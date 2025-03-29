@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map | Fluent Design</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: 0.02em;
+            font-weight: 500;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        .text-2xl {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        .text-3xl, .text-4xl {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .nav-link {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .input-label {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: 0.02em;
+            font-weight: 500;
+        }
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        .animated-gradient {
+            background: url('https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+            overflow: hidden;
+        }
+        .animated-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(44, 7, 53, 0.5);
+            pointer-events: none;
+        }
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 1s infinite;
+        }
+        .page-transition {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            transform: translateY(100%);
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 9999;
+        }
+        .page-transition.active {
+            transform: translateY(0);
+        }
+        .content {
+            transition: opacity 0.5s ease;
+        }
+        .content.fade-out {
+            opacity: 0;
+        }
+        #map {
+            height: 70vh;
+            width: 100%;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            position: relative;
+        }
+        .form-step, .map-step {
+            transition: all 0.5s ease;
+        }
+        .form-step.hidden, .map-step.hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+        }
+        .glass-card {
+            background: rgba(44, 7, 53, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(151, 223, 252, 0.2);
+        }
+        .input-field {
+            background: rgba(44, 7, 53, 0.2);
+            border: 1px solid rgba(151, 223, 252, 0.2);
+            transition: all 0.3s ease;
+            color: white;
+        }
+        .input-field:focus {
+            background: rgba(44, 7, 53, 0.3);
+            border-color: rgba(151, 223, 252, 0.3);
+            box-shadow: 0 0 0 2px rgba(151, 223, 252, 0.2);
+        }
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        /* Date picker styling */
+        .date-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        input[type="date"] {
+            position: relative;
+            color-scheme: dark;
+            padding-right: 2.5rem;
+        }
+        .calendar-icon {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+            color: rgba(151, 223, 252, 0.5);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        .calendar-icon:hover {
+            color: rgba(151, 223, 252, 1);
+        }
+        input[type="date"]:focus + .calendar-icon {
+            color: rgba(151, 223, 252, 1);
+        }
+        /* Style past dates in calendar picker */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+            opacity: 0;
+        }
+        /* Style past dates in calendar */
+        input[type="date"]::-webkit-calendar-picker-indicator::-webkit-calendar-picker {
+            background-color: rgba(44, 7, 53, 0.95);
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator::-webkit-calendar-picker-day {
+            color: white;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator::-webkit-calendar-picker-day:disabled {
+            color: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator::-webkit-calendar-picker-day:not(:disabled):hover {
+            background-color: rgba(151, 223, 252, 0.2);
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator::-webkit-calendar-picker-day:not(:disabled):focus {
+            background-color: rgba(151, 223, 252, 0.3);
+        }
+        /* Firefox specific styles */
+        input[type="date"] {
+            color-scheme: dark;
+        }
+        input[type="date"]::-moz-calendar-picker {
+            background-color: rgba(44, 7, 53, 0.95);
+        }
+        input[type="date"]::-moz-calendar-day {
+            color: white;
+        }
+        input[type="date"]::-moz-calendar-day:disabled {
+            color: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+        }
+        input[type="date"]::-moz-calendar-day:not(:disabled):hover {
+            background-color: rgba(151, 223, 252, 0.2);
+        }
+        input[type="date"]::-moz-calendar-day:not(:disabled):focus {
+            background-color: rgba(151, 223, 252, 0.3);
+        }
+        /* Date validation styling */
+        .date-error {
+            display: none;
+        }
+        input[type="date"]:invalid {
+            border-color: rgba(151, 223, 252, 0.2);
+        }
+        input[type="date"]:invalid + .calendar-icon {
+            color: rgba(151, 223, 252, 0.5);
+        }
+        .destination-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(44, 7, 53, 0.95);
+            border: 1px solid rgba(151, 223, 252, 0.2);
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            z-index: 10;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+        .destination-suggestions.show {
+            display: block;
+        }
+        .suggestion-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: white;
+        }
+        .suggestion-item:hover {
+            background: rgba(151, 223, 252, 0.1);
+        }
+        .map-legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(44, 7, 53, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            border: 1px solid rgba(151, 223, 252, 0.2);
+        }
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #97dffc;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            border-radius: 4px;
+        }
+        .legend-text {
+            color: #858ae3;
+        }
+        .site-info-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: rgba(44, 7, 53, 0.95);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(151, 223, 252, 0.2);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .site-info-panel.active {
+            right: 0;
+        }
+        .site-info-panel .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: #97dffc;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .site-info-panel .close-button:hover {
+            color: #858ae3;
+        }
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        /* Success Popup Styles */
+        .success-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .success-popup.active {
+            display: flex;
+        }
+        .success-content {
+            background: #2c0735;
+            border: 1px solid rgba(151, 223, 252, 0.3);
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .success-popup.active .success-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .success-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: #97dffc;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .success-close:hover {
+            color: #858ae3;
+        }
+    </style>
+</head>
+<body class="h-screen relative overflow-hidden animated-gradient">
+    <!-- Page Transition Overlay -->
+    <div class="page-transition"></div>
+
+    <!-- Content -->
+    <div class="relative h-full flex flex-col content">
+        <!-- Stars Container -->
+        <div class="stars" id="stars"></div>
+        
+        <!-- Header -->
+        <header class="p-6">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div class="text-2xl font-medium text-white logo">LOGO</div>
+                <nav class="space-x-6">
+                    <a href="#" class="nav-link text-white hover:text-white/90 transition-colors duration-300">About</a>
+                    <a href="#" class="nav-link text-white hover:text-white/90 transition-colors duration-300">Contact</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex items-center justify-center p-6">
+            <div class="w-full max-w-4xl glass-card rounded-2xl p-8 shadow-xl">
+                <!-- Form Step -->
+                <div class="form-step">
+                    <h1 class="text-3xl font-bold text-white text-center mb-8">Launch Details</h1>
+                    <form id="launchForm" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-white mb-2 text-sm input-label" for="name">Mission Name</label>
+                                <input type="text" id="name" name="name" required
+                                    class="w-full px-4 py-2 input-field rounded-lg text-white placeholder-white/50 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-white mb-2 text-sm input-label" for="year">Launch Date</label>
+                                <div class="date-input-wrapper">
+                                    <input type="date" id="year" name="year" required
+                                        class="w-full px-4 py-2 input-field rounded-lg text-white placeholder-white/50 focus:outline-none"
+                                        min="">
+                                    <svg class="calendar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-white mb-2 text-sm input-label" for="price">Price (USD)</label>
+                                <input type="number" id="price" name="price" min="0" required
+                                    class="w-full px-4 py-2 input-field rounded-lg text-white placeholder-white/50 focus:outline-none">
+                            </div>
+                            <div class="relative">
+                                <label class="block text-white mb-2 text-sm input-label" for="destination">Destination</label>
+                                <input type="text" id="destination" name="destination" required
+                                    class="w-full px-4 py-2 input-field rounded-lg text-white placeholder-white/50 focus:outline-none"
+                                    placeholder="Enter destination (e.g., Mars, Moon, ISS)">
+                                <div class="destination-suggestions" id="destinationSuggestions">
+                                    <div class="suggestion-item">Mars</div>
+                                    <div class="suggestion-item">Moon</div>
+                                    <div class="suggestion-item">International Space Station</div>
+                                    <div class="suggestion-item">Low Earth Orbit</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-center pt-4">
+                            <button type="submit"
+                                class="group relative px-8 py-3 bg-gradient-to-r from-[#613dc1] to-[#858ae3] hover:from-[#4e148c] hover:to-[#613dc1] text-white rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-[#613dc1]/25">
+                                <span class="relative z-10 flex items-center space-x-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span class="font-medium">View Launch Sites</span>
+                                </span>
+                                <div class="absolute inset-0 rounded-lg bg-gradient-to-r from-[#4e148c] to-[#613dc1] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Map Step -->
+                <div class="map-step hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <button onclick="showForm()" 
+                            class="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#613dc1] to-[#858ae3] hover:from-[#4e148c] hover:to-[#613dc1] text-white rounded-lg transition-all duration-300 transform hover:scale-105">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="font-medium">Back to Form</span>
+                        </button>
+                        <h1 class="text-3xl font-bold text-white">Launch Sites Map</h1>
+                        <button onclick="navigateToIndex()" 
+                            class="flex items-center space-x-2 px-4 py-2 bg-[#613dc1]/10 hover:bg-[#613dc1]/20 text-white rounded-lg transition-all duration-300 transform hover:scale-105">
+                            <span class="font-medium">Back to Home</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="map" class="mb-6"></div>
+                    <div class="text-center">
+                        <p class="text-[#97dffc]/90">Explore major space launch facilities around the world</p>
+                    </div>
+                    <button onclick="showSuccessPopup()" 
+                        class="w-full px-6 py-3 bg-gradient-to-r from-[#613dc1] to-[#858ae3] hover:from-[#4e148c] hover:to-[#613dc1] text-white rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-[#613dc1]/25">
+                        Book Flight
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Site Info Panel -->
+    <div class="site-info-panel">
+        <div class="close-button" onclick="closeSiteInfo()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </div>
+        <div id="siteInfoContent" class="p-6"></div>
+    </div>
+
+    <!-- Success Popup -->
+    <div class="success-popup">
+        <div class="success-content">
+            <div class="close-button success-close" onclick="closeSuccessPopup()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </div>
+            <div class="mb-6">
+                <div class="w-20 h-20 bg-[#613dc1]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-12 h-12 text-[#97dffc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Booking Successful!</h2>
+                <p class="text-[#97dffc]">Your space flight has been confirmed.</p>
+            </div>
+            <button onclick="closeSuccessPopup()" 
+                class="w-full px-6 py-3 bg-gradient-to-r from-[#613dc1] to-[#858ae3] hover:from-[#4e148c] hover:to-[#613dc1] text-white rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-[#613dc1]/25">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const transitionOverlay = document.querySelector('.page-transition');
+        const content = document.querySelector('.content');
+        const formStep = document.querySelector('.form-step');
+        const mapStep = document.querySelector('.map-step');
+        const destinationInput = document.getElementById('destination');
+        const suggestionsDiv = document.getElementById('destinationSuggestions');
+        let map = null;
+
+        // Success popup functions
+        window.showSuccessPopup = function() {
+            const popup = document.querySelector('.success-popup');
+            if (popup) {
+                popup.classList.add('active');
+            }
+        };
+
+        window.closeSuccessPopup = function() {
+            const popup = document.querySelector('.success-popup');
+            if (popup) {
+                popup.classList.remove('active');
+            }
+        };
+
+        // Close success popup when clicking outside
+        document.addEventListener('click', function(e) {
+            const popup = document.querySelector('.success-popup');
+            if (popup && popup.classList.contains('active') && !popup.querySelector('.success-content').contains(e.target)) {
+                window.closeSuccessPopup();
+            }
+        });
+
+        function closeSiteInfo() {
+            const panel = document.querySelector('.site-info-panel');
+            if (panel) {
+                panel.classList.remove('active');
+            }
+        }
+
+        // Destination suggestions functionality
+        destinationInput.addEventListener('focus', () => {
+            suggestionsDiv.classList.add('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!destinationInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                suggestionsDiv.classList.remove('show');
+            }
+        });
+
+        document.querySelectorAll('.suggestion-item').forEach(item => {
+            item.addEventListener('click', () => {
+                destinationInput.value = item.textContent;
+                suggestionsDiv.classList.remove('show');
+            });
+        });
+
+        function navigateToIndex() {
+            content.classList.add('fade-out');
+            setTimeout(() => {
+                transitionOverlay.classList.add('active');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 800);
+            }, 500);
+        }
+
+        function showMap() {
+            formStep.classList.add('hidden');
+            mapStep.classList.remove('hidden');
+            if (!map) {
+                initMap();
+            }
+        }
+
+        function showForm() {
+            mapStep.classList.add('hidden');
+            formStep.classList.remove('hidden');
+        }
+
+        function calculateDestinations() {
+            const destination = document.getElementById('destination').value;
+            const year = document.getElementById('year').value;
+            const price = document.getElementById('price').value;
+            
+            // Show loading state
+            const calculateBtn = document.querySelector('button[onclick="calculateDestinations()"]');
+            calculateBtn.innerHTML = 'Calculating...';
+            calculateBtn.disabled = true;
+
+            // Simulate calculation delay
+            setTimeout(() => {
+                showMap();
+                calculateBtn.innerHTML = 'Calculate Destinations';
+                calculateBtn.disabled = false;
+            }, 1500);
+        }
+
+        // Form submission handler
+        document.getElementById('launchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('name').value;
+            const date = document.getElementById('year').value;
+            const price = document.getElementById('price').value;
+            const destination = document.getElementById('destination').value;
+
+            // Validate all fields
+            if (!name || !date || !price || !destination) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            // If all validations pass, show the map
+            showMap();
+        });
+
+        // Add keyboard shortcut for going back to form
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !formStep.classList.contains('hidden')) {
+                showForm();
+            }
+        });
+
+        // Initialize stars when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            createStars();
+            
+            // Initialize date input
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('year');
+            dateInput.min = today;
+        });
+
+        // Initialize map
+        function initMap() {
+            map = L.map('map').setView([20, 0], 2);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Launch Sites with more details
+            const launchSites = [
+                { 
+                    name: "Cape Canaveral", 
+                    coords: [28.5721, -80.648], 
+                    description: "NASA's primary launch site",
+                    capabilities: ["Mars", "Moon", "ISS", "LEO"],
+                    successRate: "98%",
+                    compatibility: "High",
+                    email: "contact@nasa.gov"
+                },
+                { 
+                    name: "Baikonur Cosmodrome", 
+                    coords: [45.965, 63.305], 
+                    description: "World's first spaceport",
+                    capabilities: ["Mars", "Moon", "ISS", "LEO"],
+                    successRate: "95%",
+                    compatibility: "High",
+                    email: "info@roscosmos.ru"
+                },
+                { 
+                    name: "Kourou Spaceport", 
+                    coords: [5.236, -52.768], 
+                    description: "European Space Agency launch site",
+                    capabilities: ["Mars", "Moon", "LEO"],
+                    successRate: "97%",
+                    compatibility: "Medium",
+                    email: "contact@esa.int"
+                },
+                { 
+                    name: "Jiuquan Satellite Launch Center", 
+                    coords: [40.958, 100.291], 
+                    description: "China's first launch site",
+                    capabilities: ["Mars", "Moon", "LEO"],
+                    successRate: "96%",
+                    compatibility: "Medium",
+                    email: "info@cnsa.gov.cn"
+                },
+                { 
+                    name: "Satish Dhawan Space Centre", 
+                    coords: [13.733, 80.235], 
+                    description: "India's primary spaceport",
+                    capabilities: ["Moon", "LEO"],
+                    successRate: "94%",
+                    compatibility: "Low",
+                    email: "contact@isro.gov.in"
+                }
+            ];
+
+            // Function to generate simulated weather data
+            function getSimulatedWeather(lat, lon) {
+                // Generate random but realistic weather data based on latitude
+                const temperature = Math.round(20 + (Math.random() * 15) - (Math.abs(lat) / 10));
+                const conditions = ['Clear', 'Partly Cloudy', 'Cloudy', 'Light Rain', 'Heavy Rain'][Math.floor(Math.random() * 5)];
+                const humidity = Math.round(40 + Math.random() * 40);
+                const windSpeed = Math.round(5 + Math.random() * 15);
+
+                return {
+                    temperature: temperature,
+                    conditions: conditions,
+                    humidity: humidity,
+                    windSpeed: windSpeed
+                };
+            }
+
+            // Create custom icons with different colors based on compatibility
+            const createCustomIcon = (compatibility) => {
+                let color;
+                switch(compatibility) {
+                    case "High":
+                        color = "#97dffc";
+                        break;
+                    case "Medium":
+                        color = "#858ae3";
+                        break;
+                    case "Low":
+                        color = "#613dc1";
+                        break;
+                }
+                return L.divIcon({
+                    html: `<div style="background-color: ${color}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #2c0735; box-shadow: 0 0 0 2px ${color};"></div>`,
+                    className: 'custom-div-icon',
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                });
+            };
+
+            // Add markers with side panel info
+            launchSites.forEach(site => {
+                const marker = L.marker(site.coords, { icon: createCustomIcon(site.compatibility) }).addTo(map);
+                
+                // Get simulated weather data
+                const weather = getSimulatedWeather(site.coords[0], site.coords[1]);
+                
+                // Create info content
+                let infoContent = `
+                    <div class="text-white">
+                        <div class="mb-4">
+                            <h3 class="font-bold text-xl text-[#97dffc] mb-2">${site.name}</h3>
+                            <p class="text-base text-[#858ae3]">${site.description}</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="bg-[#2c0735]/30 p-3 rounded-lg">
+                                <p class="text-sm text-[#858ae3] mb-1">Success Rate</p>
+                                <p class="text-lg font-semibold text-[#97dffc]">${site.successRate}</p>
+                            </div>
+                            <div class="bg-[#2c0735]/30 p-3 rounded-lg">
+                                <p class="text-sm text-[#858ae3] mb-1">Compatibility</p>
+                                <p class="text-lg font-semibold text-[#97dffc]">${site.compatibility}</p>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <p class="text-sm text-[#858ae3] mb-1">Contact</p>
+                            <a href="mailto:${site.email}" class="text-[#97dffc] hover:text-[#858ae3] text-base break-all">${site.email}</a>
+                        </div>
+                        <div class="border-t border-[#858ae3]/20 pt-4 mb-6">
+                            <h4 class="text-base font-bold text-[#97dffc] mb-3">Weather Conditions</h4>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-[#2c0735]/30 p-3 rounded-lg">
+                                    <p class="text-sm text-[#858ae3] mb-1">Temperature</p>
+                                    <p class="text-lg font-semibold text-[#97dffc]">${weather.temperature}°C</p>
+                                </div>
+                                <div class="bg-[#2c0735]/30 p-3 rounded-lg">
+                                    <p class="text-sm text-[#858ae3] mb-1">Conditions</p>
+                                    <p class="text-lg font-semibold text-[#97dffc] capitalize">${weather.conditions}</p>
+                                </div>
+                                <div class="bg-[#2c0735]/30 p-3 rounded-lg">
+                                    <p class="text-sm text-[#858ae3] mb-1">Humidity</p>
+                                    <p class="text-lg font-semibold text-[#97dffc]">${weather.humidity}%</p>
+                                </div>
+                                <div class="bg-[#2c0735]/30 p-3 rounded-lg">
+                                    <p class="text-sm text-[#858ae3] mb-1">Wind Speed</p>
+                                    <p class="text-lg font-semibold text-[#97dffc]">${weather.windSpeed} m/s</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <button onclick="window.showSuccessPopup()" 
+                                class="w-full px-6 py-3 bg-gradient-to-r from-[#613dc1] to-[#858ae3] hover:from-[#4e148c] hover:to-[#613dc1] text-white rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-[#613dc1]/25">
+                                Book Flight
+                            </button>
+                            <button onclick="window.location.href='index.html'" 
+                                class="w-full px-6 py-3 bg-[#613dc1]/20 hover:bg-[#613dc1]/30 text-white rounded-lg transition-all duration-300 transform hover:scale-105 border border-[#613dc1]/30">
+                                Return to Home
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                marker.on('click', function() {
+                    document.getElementById('siteInfoContent').innerHTML = infoContent;
+                    document.querySelector('.site-info-panel').classList.add('active');
+                });
+            });
+
+            // Close panel when clicking outside
+            document.addEventListener('click', function(e) {
+                const panel = document.querySelector('.site-info-panel');
+                const mapContainer = document.getElementById('map');
+                
+                if (panel && panel.classList.contains('active') && !panel.contains(e.target) && !mapContainer.contains(e.target)) {
+                    closeSiteInfo();
+                }
+            });
+
+            // Add legend
+            const legend = L.control({ position: 'bottomright' });
+            legend.onAdd = function(map) {
+                const div = L.DomUtil.create('div', 'map-legend');
+                div.innerHTML = `
+                    <div class="legend-title">Launch Site Compatibility</div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #97dffc;"></div>
+                        <div class="legend-text">High Compatibility</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #858ae3;"></div>
+                        <div class="legend-text">Medium Compatibility</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #613dc1;"></div>
+                        <div class="legend-text">Low Compatibility</div>
+                    </div>
+                `;
+                return div;
+            };
+            legend.addTo(map);
+
+            // Animate map appearance
+            gsap.from("#map", {
+                opacity: 0,
+                y: 20,
+                duration: 1,
+                delay: 0.5
+            });
+        }
+
+        // Handle wheel event for navigation
+        window.addEventListener('wheel', function(e) {
+            if (e.deltaY < 0) {
+                content.classList.add('fade-out');
+                setTimeout(() => {
+                    transitionOverlay.classList.add('active');
+                    setTimeout(() => {
+                        window.location.href = 'choose.html';
+                    }, 800);
+                }, 500);
+            }
+        }, { passive: true });
+
+        // Add stars to the background
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const numberOfStars = 200;
+
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 2}s`;
+                starsContainer.appendChild(star);
+            }
+        }
+    </script>
+</body>
+</html>

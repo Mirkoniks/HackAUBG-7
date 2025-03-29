@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Path | Fluent Design</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: 0.02em;
+            font-weight: 500;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        .text-2xl {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        .text-4xl {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .nav-link {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .heading {
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.1;
+            }
+            25% {
+                opacity: 0.8;
+            }
+            50% {
+                opacity: 1;
+            }
+            75% {
+                opacity: 0.8;
+            }
+        }
+        .animated-gradient {
+            background: url('https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=60') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+            overflow: hidden;
+            will-change: transform;
+        }
+        .animated-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(44, 7, 53, 0.5);
+            pointer-events: none;
+            will-change: opacity;
+        }
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            will-change: transform;
+        }
+        .star {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 1.2s infinite;
+            will-change: opacity;
+        }
+        .glass-card {
+            background: rgba(44, 7, 53, 0.2);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(151, 223, 252, 0.2);
+            transition: transform 0.3s ease;
+            will-change: transform;
+        }
+        .glass-card:hover {
+            background: rgba(44, 7, 53, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .page-transition {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            transform: scale(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 9999;
+            overflow: hidden;
+            transform-origin: center;
+            will-change: transform;
+        }
+        .page-transition.active {
+            transform: scale(1);
+        }
+        .content {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            will-change: transform, opacity;
+        }
+        .content.fade-out {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            transform: translateZ(0);
+            perspective: 1000px;
+            will-change: transform;
+        }
+        .star-trail {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            background: white;
+            border-radius: 50%;
+            transform-style: preserve-3d;
+            animation: starTrail 0.6s linear infinite;
+            will-change: transform, opacity;
+        }
+        @keyframes starTrail {
+            0% {
+                transform: translateZ(0) scale(1);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateZ(-500px) scale(0);
+                opacity: 0;
+            }
+        }
+        .hyperspace-tunnel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center,
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0.05) 20%,
+                rgba(0, 0, 0, 0) 100%
+            );
+            animation: tunnel 0.6s ease-in-out forwards;
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+        @keyframes tunnel {
+            0% {
+                transform: scale(0.1);
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.8;
+            }
+            80% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+        .energy-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 80px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: energyRing 0.6s ease-in-out forwards;
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+        @keyframes energyRing {
+            0% {
+                transform: translate(-50%, -50%) scale(0.1);
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.8;
+            }
+            80% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(15);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body class="h-screen relative overflow-hidden animated-gradient">
+    <!-- Page Transition Overlay -->
+    <div class="page-transition"></div>
+
+    <!-- Stars Container -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Content -->
+    <div class="relative h-full flex flex-col content">
+        <!-- Header -->
+        <header class="p-6">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div class="text-2xl font-medium text-white logo">LOGO</div>
+                <nav class="space-x-6">
+                    <a href="#" class="nav-link text-white hover:text-white/90 transition-colors duration-300">About</a>
+                    <a href="#" class="nav-link text-white hover:text-white/90 transition-colors duration-300">Contact</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex items-center justify-center p-6">
+            <div class="w-full h-[90vh] grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Customer Side -->
+                <a href="index.html" class="cursor-pointer group flex items-center justify-center">
+                    <div class="text-center transform transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2">
+                        <div class="mb-8">
+                            <svg class="w-24 h-24 mx-auto text-white transform transition-all duration-300 group-hover:scale-125 group-hover:opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-4xl font-bold text-white transform transition-all duration-300 group-hover:scale-110 group-hover:opacity-90 heading">I'm a Customer</h2>
+                    </div>
+                </a>
+
+                <!-- Business Side -->
+                <a href="map.html" class="cursor-pointer group flex items-center justify-center">
+                    <div class="text-center transform transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2">
+                        <div class="mb-8">
+                            <svg class="w-24 h-24 mx-auto text-white transform transition-all duration-300 group-hover:scale-125 group-hover:opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-4xl font-bold text-white transform transition-all duration-300 group-hover:scale-110 group-hover:opacity-90 heading">I'm a Business</h2>
+                    </div>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const transitionOverlay = document.querySelector('.page-transition');
+        const content = document.querySelector('.content');
+
+        let scrollTimeout;
+        let isScrolling = false;
+
+        // Add stars to the background
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const numberOfStars = 150;
+
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 3}s`;
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Create star trails for hyperspace effect
+        function createStarTrails() {
+            const container = document.createElement('div');
+            container.className = 'stars-container';
+            
+            for (let i = 0; i < 100; i++) {
+                const trail = document.createElement('div');
+                trail.className = 'star-trail';
+                trail.style.left = `${Math.random() * 100}%`;
+                trail.style.top = `${Math.random() * 100}%`;
+                trail.style.animationDelay = `${Math.random() * 2}s`;
+                container.appendChild(trail);
+            }
+            
+            document.body.appendChild(container);
+        }
+
+        // Create hyperspace tunnel effect
+        function createHyperspaceTunnel() {
+            const tunnel = document.createElement('div');
+            tunnel.className = 'hyperspace-tunnel';
+            transitionOverlay.appendChild(tunnel);
+        }
+
+        // Create energy ring effect
+        function createEnergyRing() {
+            const ring = document.createElement('div');
+            ring.className = 'energy-ring';
+            transitionOverlay.appendChild(ring);
+        }
+
+        // Function to navigate back to index
+        function navigateToIndex() {
+            content.classList.add('fade-out');
+            setTimeout(() => {
+                transitionOverlay.classList.add('active');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 600);
+            }, 200);
+        }
+
+        // Initialize all effects when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            createStarTrails();
+            createHyperspaceTunnel();
+            createEnergyRing();
+        });
+
+        // Handle scroll events
+        window.addEventListener('scroll', function() {
+            if (!isScrolling) {
+                isScrolling = true;
+                clearTimeout(scrollTimeout);
+                
+                scrollTimeout = setTimeout(function() {
+                    if (window.scrollY < -50) {
+                        navigateToIndex();
+                    }
+                    isScrolling = false;
+                }, 150);
+            }
+        });
+
+        // Handle wheel events
+        window.addEventListener('wheel', function(e) {
+            if (e.deltaY < 0) {
+                navigateToIndex();
+            }
+        }, { passive: true });
+
+        // Handle navigation for links
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const href = this.getAttribute('href');
+                if (href !== '#') {
+                    content.classList.add('fade-out');
+                    setTimeout(() => {
+                        transitionOverlay.classList.add('active');
+                        setTimeout(() => {
+                            window.location.href = href;
+                        }, 600);
+                    }, 200);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
