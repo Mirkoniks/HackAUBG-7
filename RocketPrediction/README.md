@@ -1,28 +1,58 @@
-# Spaceport Location Predictor
+# Rocket Port Prediction System
 
-A Django web application that predicts optimal spaceport locations for space missions using machine learning models.
+A Django-based web application that predicts optimal spaceport locations for rocket launches based on various parameters including launch date, payload weight, and destination.
 
 ## Features
 
-- User authentication system
-- Contact form for inquiries
-- Mission input form with prediction capabilities
-- Interactive map display of recommended spaceport locations
-- Weather predictions for each recommended location
+- User Authentication System
+  - User registration and login
+  - Secure password management
+  - User profile management
+
+- Mission Planning
+  - Create and manage launch missions
+  - Input parameters:
+    - Launch date (future dates only)
+    - Payload weight
+    - Destination selection
+    - Mission name
+  - Real-time validation of inputs
+  - Mission history tracking
+
+- Spaceport Prediction
+  - ML-based prediction system for optimal spaceport locations
+  - Takes into account:
+    - Launch date
+    - Payload weight
+    - Destination coordinates
+  - Provides confidence scores for predictions
+
+## Technical Stack
+
+- **Backend**: Django 5.1.7
+- **Database**: PostgreSQL 13
+- **Frontend**: 
+  - HTML5
+  - CSS3
+  - JavaScript
+  - Bootstrap 5
+- **ML Components**: 
+  - scikit-learn
+  - joblib
+  - pandas
 
 ## Prerequisites
 
-- Python 3.8 or higher
-- Django 4.2 or higher
-- PostgreSQL 13 or higher
-- Required Python packages (see requirements.txt)
+- Python 3.11
+- PostgreSQL 13
+- pip (Python package manager)
 
-## Setup Instructions
+## Installation
 
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd spaceport-project
+cd RocketPrediction
 ```
 
 2. Create and activate a virtual environment:
@@ -31,7 +61,7 @@ python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-3. Install required packages:
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
@@ -42,98 +72,81 @@ pip install -r requirements.txt
 psql -U postgres
 
 # Create the database
-CREATE DATABASE spaceport_db;
+CREATE DATABASE rocket_prediction;
 
 # Exit psql
 \q
 ```
 
-5. Create the models directory and add your ML models:
+5. Set up environment variables:
 ```bash
-mkdir rocket_port_predictor/models
+export DEBUG=1
+export DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 ```
 
-6. Add your ML model files to the `rocket_port_predictor/models/` directory:
-- `launch_location_model.pkl`: Main model for predicting spaceport locations
-- `weather_model_port1.pkl`: Weather prediction model for first spaceport
-- `weather_model_port2.pkl`: Weather prediction model for second spaceport
-- `weather_model_port3.pkl`: Weather prediction model for third spaceport
-
-7. Apply database migrations:
+6. Run migrations:
 ```bash
-python manage.py makemigrations
 python manage.py migrate
 ```
 
-8. Create a superuser (optional):
+7. Create a superuser (optional):
 ```bash
 python manage.py createsuperuser
 ```
 
-9. Run the development server:
+8. Start the development server:
 ```bash
 python manage.py runserver
 ```
 
-10. Visit http://127.0.0.1:8000/ in your web browser
-
-## Database Configuration
-
-The application uses PostgreSQL as its database. The default configuration in `settings.py` assumes:
-- Database name: `spaceport_db`
-- Username: `postgres`
-- Password: `postgres`
-- Host: `localhost`
-- Port: `5432`
-
-If your PostgreSQL setup is different, update these settings in `settings.py` accordingly.
+The application will be available at http://localhost:8000
 
 ## Project Structure
 
 ```
-spaceport_project/
-├── manage.py
-├── requirements.txt
-├── spaceport_project/
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-└── rocket_port_predictor/
-    ├── __init__.py
-    ├── admin.py
-    ├── apps.py
-    ├── forms.py
-    ├── models.py
-    ├── models/
-    │   ├── launch_location_model.pkl
-    │   ├── weather_model_port1.pkl
-    │   ├── weather_model_port2.pkl
-    │   └── weather_model_port3.pkl
-    ├── templates/
-    │   └── rocket_port_predictor/
-    │       ├── base.html
-    │       ├── home.html
-    │       ├── login.html
-    │       ├── contact.html
-    │       ├── thank_you.html
-    │       ├── mission_form.html
-    │       └── prediction_results.html
-    ├── urls.py
-    └── views.py
+RocketPrediction/
+├── rocket_port_predictor/     # Main Django application
+│   ├── templates/            # HTML templates
+│   ├── static/              # Static files (CSS, JS, images)
+│   ├── models.py            # Database models
+│   ├── views.py             # View logic
+│   └── urls.py              # URL routing
+├── spaceport_project/       # Django project settings
+└── requirements.txt        # Python dependencies
 ```
 
-## Model Requirements
+## API Endpoints
 
-The ML models should be trained to provide the following outputs:
+### Authentication
+- `/login/` - User login
+- `/register/` - User registration
+- `/logout/` - User logout
 
-### Launch Location Model (`launch_location_model.pkl`)
-- Input features: budget, launch date (month, day)
-- Output: probability distribution over possible spaceport locations
+### Mission Management
+- `/` - Home page
+- `/mission/create/` - Create new mission
+- `/mission/<int:pk>/` - View mission details
+- `/mission/<int:pk>/edit/` - Edit mission
+- `/mission/<int:pk>/delete/` - Delete mission
 
-### Weather Models (`weather_model_portX.pkl`)
-- Input features: same as launch location model
-- Output: [latitude, longitude, temperature, wind_speed, humidity, cloud_coverage]
+## Development
+
+### Database Management
+
+- Create migrations:
+```bash
+python manage.py makemigrations
+```
+
+- Apply migrations:
+```bash
+python manage.py migrate
+```
+
+- Create superuser:
+```bash
+python manage.py createsuperuser
+```
 
 ## Contributing
 
@@ -145,4 +158,15 @@ The ML models should be trained to provide the following outputs:
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For support, please open an issue in the repository or contact the development team.
+
+## Acknowledgments
+
+- Django framework
+- Bootstrap 5 for UI components
+- scikit-learn for ML capabilities
+- All contributors and maintainers 
