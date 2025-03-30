@@ -79,3 +79,42 @@ Real aerospace companies use similar systems for launch planning, weather foreca
 ---
 
 ## Repo Structure
+
+HackAUBG-7/ ├── ml_models/ # Trained models and notebooks │ ├── FinalModelRandomForest.ipynb │ ├── WeatherPrediction.ipynb │ ├── \*.pkl # Saved models and encoders ├── data/ # Public datasets (or instructions) ├── app/ # Django app │ ├── views.py │ ├── predictor.py # Prediction logic │ └── templates/
+
+## Example Prediction
+
+Inputs:
+rocket_name = "Falcon 9 Block 5"
+launch_date = "2027-09-14"
+cost = 40000000
+destination = "Mars"
+Predicted Launch Site:
+
+LC-39A, Kennedy Space Center, Florida, USA
+
+Top 3 Launch Sites:
+
+LC-39A: 32.2%
+
+SLC-41: 25.6%
+
+ELA-3: 18.3%
+
+Weather Prediction (Astana, September):
+
+Temperature: 16.06°C
+
+Wind: 19.12 km/h
+
+Team
+Developed by the RoboClub team from Technical University of Sofia
+
+Hackathon: HackAUBG 7
+
+Future Plans
+Add satellite trajectory optimization
+
+Integrate real-time weather APIs
+
+Allow full mission simulation for aerospace students
