@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'rocket_port_predictor'
+
 urlpatterns = [
     path('', views.HomeView.as_view(), name='home'),
     path('login/', views.CustomLoginView.as_view(), name='login'),

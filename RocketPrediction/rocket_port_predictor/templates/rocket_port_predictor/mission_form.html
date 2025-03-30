@@ -1,30 +1,175 @@
 {% extends 'rocket_port_predictor/base.html' %}
+{% load static %}
 
 {% block title %}New Mission{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .dashboard {
+        min-height: 100vh;
+        padding: 2rem 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+    }
+    .page-header {
+        background: linear-gradient(135deg, var(--space-purple) 0%, var(--space-blue) 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('https://images.unsplash.com/photo-1446776811953-b23d0bd71f51?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') center/cover;
+        opacity: 0.1;
+        z-index: 0;
+    }
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 10px var(--glow-color);
+    }
+    .page-subtitle {
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    .mission-card {
+        background: rgba(26, 27, 59, 0.8);
+        border: 1px solid rgba(52, 152, 219, 0.3);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        margin: auto;
+        max-width: 800px;
+        width: 100%;
+    }
+    .mission-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--cosmic-blue), var(--cosmic-purple));
+    }
+    .form-label {
+        font-weight: 600;
+        color: #ffffff;
+        margin-bottom: 0.5rem;
+        font-family: 'Orbitron', sans-serif;
+    }
+    .form-control {
+        background-color: rgba(26, 27, 59, 0.8);
+        border: 1px solid rgba(52, 152, 219, 0.3);
+        color: #ffffff;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus {
+        background-color: rgba(26, 27, 59, 0.9);
+        border-color: var(--cosmic-blue);
+        box-shadow: 0 0 15px var(--glow-color);
+    }
+    .submit-button {
+        background: linear-gradient(135deg, var(--cosmic-blue) 0%, var(--cosmic-purple) 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    .submit-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 20px var(--glow-color);
+    }
+    .submit-button i {
+        margin-right: 8px;
+    }
+    .alert-danger {
+        background-color: rgba(231, 76, 60, 0.1);
+        border: 1px solid rgba(231, 76, 60, 0.3);
+        color: #e74c3c;
+        padding: 0.75rem 1rem;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        border-radius: 8px;
+    }
+    .alert-danger::before {
+        content: '\f071';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        <div class="card">
-            <div class="card-body">
-                <h2 class="card-title text-center mb-4">New Mission Details</h2>
-                <form method="post">
-                    {% csrf_token %}
-                    {% for field in form %}
-                    <div class="mb-3">
-                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.errors %}
-                        <div class="alert alert-danger">
-                            {{ field.errors }}
+<div class="dashboard">
+    <div class="page-header">
+        <div class="container">
+            <div class="row">
+                <div class="col text-center">
+                    <h1 class="page-title">Plan Your Space Mission</h1>
+                    <p class="page-subtitle">Enter your mission details to find the perfect launch site</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="mission-card">
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <div class="mb-4">
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {% if field.label == "Rocket name" %}
+                                    <i class="fas fa-rocket"></i>
+                                {% elif field.label == "Launch date" %}
+                                    <i class="fas fa-calendar"></i>
+                                {% elif field.label == "Cost million" %}
+                                    <i class="fas fa-dollar-sign"></i>
+                                {% elif field.label == "Destination" %}
+                                    <i class="fas fa-globe"></i>
+                                {% endif %}
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% if field.errors %}
+                            <div class="alert alert-danger">
+                                {{ field.errors }}
+                            </div>
+                            {% endif %}
                         </div>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Predict Spaceport Locations</button>
-                    </div>
-                </form>
+                        {% endfor %}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary submit-button">
+                                <i class="fas fa-search-location"></i>
+                                Find Launch Sites
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

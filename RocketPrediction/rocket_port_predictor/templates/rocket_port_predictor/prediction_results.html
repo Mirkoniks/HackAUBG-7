@@ -1,71 +1,282 @@
 {% extends 'rocket_port_predictor/base.html' %}
 {% load static %}
 
-{% block title %}Prediction Results{% endblock %}
+{% block title %}Launch Site Recommendations{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
+    .dashboard {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    .page-header {
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .page-subtitle {
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    .back-button {
+        background-color: rgba(255,255,255,0.1);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+    .back-button:hover {
+        background-color: rgba(255,255,255,0.2);
+        color: white;
+        transform: translateX(-5px);
+    }
+    #map-container {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
     #map {
-        height: 400px;
+        height: 500px;
         width: 100%;
-        margin-bottom: 20px;
+        z-index: 1;
+    }
+    #map-loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1rem 2rem;
+        border-radius: 30px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        font-weight: 500;
+    }
+    #map-loading i {
+        color: #3498db;
+        margin-right: 8px;
     }
     .location-card {
         background: white;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        height: 100%;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
     }
-    .location-card h3 {
-        color: #2c3e50;
-        margin-bottom: 15px;
+    .location-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        border-color: #3498db;
     }
-    .probability {
-        color: #3498db;
+    .location-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #3498db, #2ecc71);
+    }
+    .card-rank {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #f8f9fa;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-weight: bold;
-        font-size: 1.2em;
+        color: #2c3e50;
+        border: 2px solid #e9ecef;
+    }
+    .location-name {
+        color: #2c3e50;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-right: 2.5rem;
+        line-height: 1.4;
+    }
+    .probability-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .probability-value {
+        color: #3498db;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .probability-label {
+        color: #666;
+        font-size: 0.9rem;
     }
     .weather-info {
-        margin-top: 10px;
-        padding: 10px;
-        background-color: #f8f9fa;
-        border-radius: 5px;
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1.2rem;
     }
-    .weather-info i {
+    .weather-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+    .weather-title i {
         margin-right: 8px;
+        color: #f39c12;
+    }
+    .weather-stat {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.8rem;
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: background-color 0.2s;
+    }
+    .weather-stat:hover {
+        background-color: #f8f9fa;
+    }
+    .weather-stat i {
+        width: 24px;
+        margin-right: 10px;
         color: #666;
+    }
+    .weather-stat-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    .weather-stat-value {
+        margin-left: auto;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    .no-results {
+        background: white;
+        border-radius: 12px;
+        padding: 3rem;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .no-results i {
+        font-size: 3rem;
+        color: #95a5a6;
+        margin-bottom: 1rem;
+    }
+    .no-results h3 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+    .no-results p {
+        color: #7f8c8d;
+        margin-bottom: 1.5rem;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Recommended Spaceport Locations</h1>
-
-    <!-- Map Container -->
-    <div id="map" class="mb-4"></div>
-
-    <!-- Location Cards -->
-    <div class="row">
-        {% for spaceport in spaceports %}
-        <div class="col-md-4 mb-4">
-            <div class="location-card">
-                <h3>{{ spaceport.name }}</h3>
-                <p class="probability">Probability: {{ spaceport.probability }}%</p>
-                <div class="weather-info">
-                    <p><i class="fas fa-thermometer-half"></i> Temperature: {{ spaceport.weather.temperature }}°C</p>
-                    <p><i class="fas fa-wind"></i> Wind Speed: {{ spaceport.weather.wind_speed }} km/h</p>
-                    <p><i class="fas fa-map-marker-alt"></i> Weather data from: {{ spaceport.weather.city }}</p>
+<div class="dashboard">
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <a href="{% url 'rocket_port_predictor:mission_form' %}" class="back-button">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                </div>
+                <div class="col text-center">
+                    <h1 class="page-title">Launch Site Recommendations</h1>
+                    <p class="page-subtitle">Based on your mission parameters</p>
                 </div>
             </div>
         </div>
-        {% empty %}
-        <div class="col-12">
-            <p class="text-center">No spaceport predictions available.</p>
+    </div>
+
+    <div class="container">
+        <!-- Map Container -->
+        <div id="map-container">
+            <div id="map"></div>
+            <div id="map-loading">
+                <i class="fas fa-spinner fa-spin"></i> Loading launch sites...
+            </div>
         </div>
-        {% endfor %}
+
+        <!-- Location Cards -->
+        <div class="row">
+            {% for spaceport in spaceports %}
+            <div class="col-md-4 mb-4">
+                <div class="location-card">
+                    <div class="card-rank">#{{ forloop.counter }}</div>
+                    <h3 class="location-name">{{ spaceport.name }}</h3>
+                    
+                    <div class="probability-section">
+                        <div class="probability-value">{{ spaceport.probability }}%</div>
+                        <div class="probability-label">
+                            <i class="fas fa-chart-line"></i> Match Probability
+                        </div>
+                    </div>
+                    
+                    <div class="weather-info">
+                        <div class="weather-title">
+                            <i class="fas fa-cloud-sun"></i> Weather Conditions
+                        </div>
+                        <div class="weather-stat">
+                            <i class="fas fa-thermometer-half"></i>
+                            <span class="weather-stat-label">Temperature</span>
+                            <span class="weather-stat-value">{{ spaceport.weather.temperature }}°C</span>
+                        </div>
+                        <div class="weather-stat">
+                            <i class="fas fa-wind"></i>
+                            <span class="weather-stat-label">Wind Speed</span>
+                            <span class="weather-stat-value">{{ spaceport.weather.wind_speed }} km/h</span>
+                        </div>
+                        <div class="weather-stat">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span class="weather-stat-label">Data Source</span>
+                            <span class="weather-stat-value">{{ spaceport.weather.city }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="no-results">
+                    <i class="fas fa-satellite-dish"></i>
+                    <h3>No Launch Sites Found</h3>
+                    <p>We couldn't find any suitable launch sites matching your mission parameters.</p>
+                    <a href="{% url 'rocket_port_predictor:mission_form' %}" class="btn btn-primary">
+                        <i class="fas fa-redo"></i> Try Different Parameters
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -74,30 +285,66 @@
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize the map
-        var map = L.map('map');
+        // Initialize the map with a custom style
+        var map = L.map('map', {
+            zoomControl: false // We'll add it to the right side
+        });
         
-        // Add the OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap contributors'
+        // Add zoom control to the right
+        L.control.zoom({
+            position: 'topright'
+        }).addTo(map);
+        
+        // Add a modern-looking tile layer
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '©OpenStreetMap, ©CartoDB',
+            maxZoom: 19
         }).addTo(map);
 
         var markers = [];
         var bounds = L.latLngBounds();
         
+        // Custom icon for markers
+        var customIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: "<div style='background-color:#3498db;' class='marker-pin'></div><i class='fas fa-rocket' style='color:#2c3e50;'></i>",
+            iconSize: [30, 42],
+            iconAnchor: [15, 42]
+        });
+        
         // Add markers for each spaceport
         {% for spaceport in spaceports %}
             var lat = {{ spaceport.coordinates.0 }};
             var lng = {{ spaceport.coordinates.1 }};
-            var marker = L.marker([lat, lng])
-                .bindPopup(
-                    "<b>{{ spaceport.name }}</b><br>" +
-                    "Probability: {{ spaceport.probability }}%<br>" +
-                    "Temperature: {{ spaceport.weather.temperature }}°C<br>" +
-                    "Wind Speed: {{ spaceport.weather.wind_speed }} km/h"
-                )
-                .addTo(map);
+            
+            var marker = L.marker([lat, lng], {
+                icon: customIcon
+            }).addTo(map);
+            
+            // Create a custom popup
+            var popupContent = `
+                <div style="min-width: 200px;">
+                    <h6 style="margin: 0 0 8px 0; color: #2c3e50; font-weight: 600;">
+                        {{ spaceport.name }}
+                    </h6>
+                    <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
+                        <i class="fas fa-chart-bar" style="color: #3498db;"></i>
+                        <strong>{{ spaceport.probability }}%</strong> match
+                    </div>
+                    <div style="font-size: 0.9rem;">
+                        <p style="margin: 4px 0;">
+                            <i class="fas fa-thermometer-half" style="width: 20px; color: #666;"></i>
+                            {{ spaceport.weather.temperature }}°C
+                        </p>
+                        <p style="margin: 4px 0;">
+                            <i class="fas fa-wind" style="width: 20px; color: #666;"></i>
+                            {{ spaceport.weather.wind_speed }} km/h
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent);
             markers.push(marker);
             bounds.extend([lat, lng]);
         {% endfor %}
@@ -105,12 +352,50 @@
         // If we have markers, fit the map to show all of them
         if (markers.length > 0) {
             map.fitBounds(bounds, {
-                padding: [50, 50]
+                padding: [50, 50],
+                maxZoom: 12
             });
         } else {
-            // Default view if no markers
             map.setView([0, 0], 2);
         }
+
+        // Hide loading indicator once map is ready
+        map.once('load', function() {
+            document.getElementById('map-loading').style.display = 'none';
+        });
+        
+        // Fallback for the loading indicator
+        setTimeout(function() {
+            document.getElementById('map-loading').style.display = 'none';
+        }, 2000);
+        
+        // Add hover effect to markers
+        markers.forEach(function(marker, index) {
+            // Find corresponding card
+            var card = document.querySelectorAll('.location-card')[index];
+            
+            // Marker hover effects
+            marker.on('mouseover', function() {
+                this.openPopup();
+                if (card) card.style.transform = 'translateY(-5px)';
+            });
+            
+            marker.on('mouseout', function() {
+                this.closePopup();
+                if (card) card.style.transform = 'none';
+            });
+            
+            // Card hover effects
+            if (card) {
+                card.addEventListener('mouseover', function() {
+                    marker.openPopup();
+                });
+                
+                card.addEventListener('mouseout', function() {
+                    marker.closePopup();
+                });
+            }
+        });
     });
 </script>
 {% endblock %} 

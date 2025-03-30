@@ -40,7 +40,7 @@ class ThankYouView(TemplateView):
 class MissionPredictionView(LoginRequiredMixin, FormView):
     template_name = 'rocket_port_predictor/mission_form.html'
     form_class = MissionForm
-    success_url = reverse_lazy('prediction_results')
+    success_url = reverse_lazy('rocket_port_predictor:prediction_results')
 
     def get_seasonal_weather(self, city, month):
         # Define seasonal weather patterns for different regions
