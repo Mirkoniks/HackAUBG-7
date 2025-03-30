@@ -4,24 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}OptiLaunch{% endblock %}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>OptiLaunch - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         :root {
-            --font-heading: 'Outfit', sans-serif;
-            --font-body: 'Plus Jakarta Sans', sans-serif;
+            --font-heading: 'Helvetica Neue', Arial, sans-serif;
+            --font-body: 'Helvetica Neue', Arial, sans-serif;
+            --color-primary: #ffffff;
+            --color-background: #000000;
+            --color-text: #ffffff;
+            --color-text-muted: rgba(255, 255, 255, 0.7);
+            --color-border: rgba(255, 255, 255, 0.2);
+            --color-hover: rgba(255, 255, 255, 0.1);
         }
-        
-        body {
+
+        * {
             margin: 0;
             padding: 0;
-            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--color-background);
+            color: var(--color-text);
             font-family: var(--font-body);
-            background: #000;
-            color: #fff;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
         }
 
         .nav {
@@ -29,47 +36,95 @@
             top: 0;
             left: 0;
             right: 0;
-            padding: 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 100;
+            padding: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(10px);
-            background: rgba(0, 0, 0, 0.2);
+            z-index: 1000;
         }
 
         .nav-brand {
             font-family: var(--font-heading);
             font-size: 1.5rem;
-            font-weight: 600;
-            color: #fff;
+            font-weight: 700;
+            color: var(--color-primary);
             text-decoration: none;
-            letter-spacing: -0.02em;
+            letter-spacing: 0.05em;
         }
 
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 1.5rem;
+            align-items: center;
         }
 
         .nav-link {
-            font-family: var(--font-heading);
-            color: #fff;
+            color: var(--color-text);
             text-decoration: none;
             font-size: 0.875rem;
-            font-weight: 500;
-            opacity: 0.8;
-            transition: opacity 0.3s ease;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.1em;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
         }
 
         .nav-link:hover {
-            opacity: 1;
+            background: var(--color-hover);
         }
 
         .nav-link.primary {
-            opacity: 1;
+            background: var(--color-primary);
+            color: var(--color-background);
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
             font-weight: 600;
+        }
+
+        .nav-link.primary:hover {
+            background: var(--color-text-muted);
+            transform: translateY(-1px);
+        }
+
+        .nav-link.register {
+            background: var(--color-primary);
+            color: var(--color-background);
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .nav-link.register:hover {
+            background: var(--color-text-muted);
+            transform: translateY(-1px);
+        }
+
+        .messages {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .message {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
     </style>
     {% block extra_css %}{% endblock %}
@@ -85,6 +140,7 @@
             {% else %}
                 <a href="{% url 'rocket_port_predictor:contact' %}" class="nav-link">CONTACT</a>
                 <a href="{% url 'rocket_port_predictor:login' %}" class="nav-link">LOGIN</a>
+                <a href="{% url 'rocket_port_predictor:register' %}" class="nav-link register">REGISTER</a>
             {% endif %}
         </div>
     </nav>
@@ -92,5 +148,33 @@
     {% block content %}{% endblock %}
 
     {% block extra_js %}{% endblock %}
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message">
+            {% if message.tags == 'success' %}
+                <i class="fas fa-check-circle"></i>
+            {% elif message.tags == 'error' %}
+                <i class="fas fa-exclamation-circle"></i>
+            {% endif %}
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <script>
+        // Auto-hide messages after 5 seconds
+        setTimeout(function() {
+            const messages = document.querySelector('.messages');
+            if (messages) {
+                messages.style.opacity = '0';
+                setTimeout(function() {
+                    messages.remove();
+                }, 300);
+            }
+        }, 5000);
+    </script>
 </body>
 </html> 

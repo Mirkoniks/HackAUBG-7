@@ -4,11 +4,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView, FormView, TemplateView
 from django.urls import reverse_lazy
 from django.contrib import messages
+from django.contrib.auth import login, logout
+from django.http import HttpResponseRedirect
+from .forms import ContactForm, MissionForm, UserRegistrationForm
 import joblib
 import os
 import pandas as pd
 from datetime import datetime
-from .forms import ContactForm, MissionForm
 from .models import ContactMessage, MissionInput
 import numpy as np
 
@@ -17,12 +19,36 @@ import numpy as np
 class HomeView(TemplateView):
     template_name = 'rocket_port_predictor/home.html'
 
+class RegisterView(CreateView):
+    form_class = UserRegistrationForm
+    template_name = 'rocket_port_predictor/register.html'
+    success_url = reverse_lazy('rocket_port_predictor:home')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        user = form.save()
+        login(self.request, user)
+        messages.success(self.request, 'Account created successfully! Welcome to OptiLaunch.')
+        return response
+
 class CustomLoginView(LoginView):
     template_name = 'rocket_port_predictor/login.html'
     redirect_authenticated_user = True
+    next_page = 'rocket_port_predictor:home'
 
-class CustomLogoutView(LogoutView):
-    next_page = 'home'
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, 'Successfully logged in! Welcome back.')
+        return response
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Invalid username or password. Please try again.')
+        return super().form_invalid(form)
+
+def logout_view(request):
+    logout(request)
+    messages.success(request, 'Successfully logged out!')
+    return redirect('rocket_port_predictor:home')
 
 class ContactView(CreateView):
     model = ContactMessage

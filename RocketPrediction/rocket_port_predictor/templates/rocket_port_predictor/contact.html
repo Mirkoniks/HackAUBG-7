@@ -80,10 +80,10 @@
     .submit-button {
         margin-top: 1rem;
         padding: 1rem 2rem;
-        background: linear-gradient(135deg, #00a3ff 0%, #0066ff 100%);
+        background: white;
         border: none;
         border-radius: 0.5rem;
-        color: white;
+        color: black;
         font-weight: 600;
         font-size: 1rem;
         cursor: pointer;
@@ -113,7 +113,7 @@
 {% block content %}
 <section class="contact-section">
     <div class="contact-container">
-        <h1 class="contact-title">Contact Us</h1>
+        <h1 class="contact-title">CONTACT US</h1>
         <form class="contact-form" method="post">
             {% csrf_token %}
             <div class="form-group">
@@ -132,7 +132,7 @@
                 <label class="form-label" for="message">Message</label>
                 <textarea id="message" name="message" class="form-input" required></textarea>
             </div>
-            <button type="submit" class="submit-button">Send Message</button>
+            <button type="submit" class="submit-button">SEND MESSAGE</button>
         </form>
         <div class="contact-info">
             <p>Email: contact@optilaunch.com</p>

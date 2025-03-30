@@ -1,7 +1,7 @@
 {% extends 'rocket_port_predictor/base.html' %}
 {% load static %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Form{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -41,7 +41,7 @@
         100% { opacity: 0; }
     }
 
-    .login-container {
+    .form-container {
         width: 90%;
         max-width: 420px;
         position: relative;
@@ -62,7 +62,7 @@
         }
     }
 
-    .login-card {
+    .form-card {
         width: 100%;
         background: rgba(0, 0, 0, 0.7);
         border: 1px solid var(--color-border);
@@ -72,7 +72,7 @@
         backdrop-filter: blur(4px);
     }
 
-    .login-title {
+    .form-title {
         font-family: var(--font-heading);
         font-size: 2rem;
         font-weight: 700;
@@ -84,7 +84,7 @@
         padding-bottom: 1rem;
     }
 
-    .login-title::after {
+    .form-title::after {
         content: '';
         position: absolute;
         bottom: 0;
@@ -183,35 +183,12 @@
         text-align: center;
     }
 
-    .register-link {
-        text-align: center;
-        margin-top: 2rem;
-        color: var(--color-text-muted);
-        font-family: var(--font-body);
-        font-size: 0.95rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid var(--color-border);
-    }
-
-    .register-link a {
-        color: var(--color-primary);
-        text-decoration: none;
-        font-weight: 500;
-        transition: color 0.3s ease;
-        margin-left: 0.5rem;
-    }
-
-    .register-link a:hover {
-        color: var(--color-text-muted);
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-    }
-
     @media (max-width: 480px) {
-        .login-card {
+        .form-card {
             padding: 2rem;
         }
 
-        .login-title {
+        .form-title {
             font-size: 1.75rem;
             margin-bottom: 2rem;
         }
@@ -225,70 +202,21 @@
 
 {% block content %}
 <div class="stars"></div>
-<div class="login-container">
-    <div class="login-card">
-        <h2 class="login-title">Welcome Back</h2>
+<div class="form-container">
+    <div class="form-card">
+        <h2 class="form-title">Your Form Title</h2>
         <form method="post">
             {% csrf_token %}
             <div class="form-group">
                 <div class="form-label">
                     <i class="fas fa-user"></i>
-                    Username
+                    Field Label
                 </div>
-                <input type="text" name="username" class="form-control" placeholder="Enter your username" required>
+                <input type="text" name="field_name" class="form-control" placeholder="Enter your value" required>
             </div>
-            <div class="form-group">
-                <div class="form-label">
-                    <i class="fas fa-lock"></i>
-                    Password
-                </div>
-                <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
-            </div>
-            {% if form.errors %}
-            <div class="alert alert-danger">
-                Invalid username or password. Please try again.
-            </div>
-            {% endif %}
-            <button type="submit" class="submit-button">Sign In</button>
+            <!-- Add more form groups as needed -->
+            <button type="submit" class="submit-button">Submit</button>
         </form>
-        <div class="register-link">
-            New to OptiLaunch?<a href="{% url 'rocket_port_predictor:register' %}">Create an account</a>
-        </div>
     </div>
 </div>
-
-<script>
-    function createStars() {
-        const stars = document.querySelector('.stars');
-        const count = 150;
-
-        for (let i = 0; i < count; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-
-            // Random position
-            const x = Math.random() * 100;
-            const y = Math.random() * 100;
-            star.style.left = `${x}%`;
-            star.style.top = `${y}%`;
-
-            // Random size
-            const size = Math.random() * 3 + 1;
-            star.style.width = `${size}px`;
-            star.style.height = `${size}px`;
-
-            // Random duration
-            const duration = 1 + Math.random() * 2;
-            star.style.setProperty('--duration', `${duration}s`);
-
-            // Random delay
-            const delay = Math.random() * 2;
-            star.style.animationDelay = `${delay}s`;
-
-            stars.appendChild(star);
-        }
-    }
-
-    createStars();
-</script>
 {% endblock %} 

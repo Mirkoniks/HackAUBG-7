@@ -4,9 +4,17 @@
 {% block title %}New Mission{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
     body {
+        background: var(--color-background);
+        min-height: 100vh;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding: 0;
+        position: relative;
         overflow: hidden;
     }
 
@@ -14,227 +22,230 @@
         position: fixed;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
+        width: 100vw;
+        height: 100vh;
         pointer-events: none;
-        background: black;
-        z-index: 0;
+        z-index: 1;
     }
 
     .star {
         position: absolute;
-        background: white;
+        background: var(--color-primary);
         border-radius: 50%;
-        animation: twinkle var(--duration) infinite;
+        animation: twinkle var(--duration) ease-in-out infinite;
     }
 
     @keyframes twinkle {
-        0%, 100% { opacity: 0; }
+        0% { opacity: 0; }
         50% { opacity: 1; }
+        100% { opacity: 0; }
     }
 
     .mission-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        width: 90%;
+        max-width: 380px;
+        position: relative;
+        z-index: 2;
         display: flex;
-        align-items: center;
         justify-content: center;
-        z-index: 1;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .mission-card {
-        background: rgba(13, 14, 30, 0.85);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 24px;
-        padding: 3rem;
-        width: 90%;
-        max-width: 460px;
-        box-shadow: 
-            0 8px 32px rgba(0, 0, 0, 0.3),
-            0 0 0 1px rgba(255, 255, 255, 0.1);
-        transform: translateY(-2vh);
+        width: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid var(--color-border);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(4px);
+    }
+
+    .mission-title {
+        font-family: var(--font-heading);
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--color-primary);
+        text-align: center;
+        margin-bottom: 2rem;
+        letter-spacing: 0.05em;
+        position: relative;
+        padding-bottom: 0.75rem;
+    }
+
+    .mission-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 2px;
+        background: var(--color-primary);
     }
 
     .form-group {
-        margin-bottom: 2rem;
-        position: relative;
-        transition: all 0.3s ease;
-    }
-
-    .form-group:hover .form-label {
-        color: #00a3ff;
-        transform: translateY(-0.125rem);
+        margin-bottom: 1.5rem;
+        width: 100%;
     }
 
     .form-label {
-        font-family: var(--font-heading);
-        font-weight: 500;
-        color: rgba(255, 255, 255, 0.8);
-        margin-bottom: 0.75rem;
         display: flex;
         align-items: center;
-        font-size: 0.9375rem;
-        letter-spacing: 0.02em;
-        transition: all 0.3s ease;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+        color: var(--color-primary);
+        font-family: var(--font-heading);
+        font-size: 0.9rem;
+        opacity: 0.9;
     }
 
-    .form-control-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
+    .form-label i {
+        font-size: 1.25rem;
+        width: 24px;
+        text-align: center;
     }
 
     .form-control {
         width: 100%;
-        background: rgba(255, 255, 255, 0.03);
-        border: 2px solid rgba(255, 255, 255, 0.1);
-        border-radius: 14px;
-        padding: 1rem 1.25rem;
-        color: white;
+        box-sizing: border-box;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid var(--color-border);
+        border-radius: 16px;
+        padding: 1rem;
+        color: var(--color-primary);
         font-family: var(--font-body);
-        font-size: 1rem;
+        font-size: 0.9rem;
         transition: all 0.3s ease;
-        box-shadow: 
-            inset 0 2px 4px rgba(0, 0, 0, 0.1),
-            0 0 0 transparent;
+    }
+
+    .form-control::placeholder {
+        color: var(--color-text-muted);
     }
 
     .form-control:hover {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: rgba(0, 163, 255, 0.3);
-        box-shadow: 
-            inset 0 2px 4px rgba(0, 0, 0, 0.1),
-            0 0 15px rgba(0, 163, 255, 0.1);
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
     }
 
     .form-control:focus {
         outline: none;
-        border-color: rgba(0, 163, 255, 0.5);
-        background: rgba(255, 255, 255, 0.07);
-        box-shadow: 
-            inset 0 2px 4px rgba(0, 0, 0, 0.1),
-            0 0 0 4px rgba(0, 163, 255, 0.15),
-            0 0 20px rgba(0, 163, 255, 0.1);
+        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
     }
 
-    .form-icon {
-        font-size: 1.125rem;
-        margin-right: 0.75rem;
-        color: #00a3ff;
+    .submit-button {
+        width: 100%;
+        background: var(--color-primary);
+        border: none;
+        border-radius: 16px;
+        padding: 1rem;
+        color: var(--color-background);
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 1rem;
+        letter-spacing: 0.1em;
+        cursor: pointer;
         transition: all 0.3s ease;
-        filter: drop-shadow(0 0 8px rgba(0, 163, 255, 0.3));
+        text-transform: uppercase;
+        margin-top: 2rem;
+        position: relative;
+        overflow: hidden;
     }
 
-    .form-group:hover .form-icon {
-        transform: scale(1.1);
-        filter: drop-shadow(0 0 12px rgba(0, 163, 255, 0.4));
+    .submit-button:hover {
+        background: var(--color-text-muted);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+    }
+
+    .alert-danger {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--color-primary);
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        font-family: var(--font-body);
+        text-align: center;
     }
 
     /* Style form fields */
     input[type="text"],
     input[type="number"],
-    input[type="date"] {
+    input[type="date"],
+    select {
+        width: 100%;
+        box-sizing: border-box;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid var(--color-border);
+        border-radius: 16px;
+        padding: 1rem;
+        color: var(--color-primary);
         font-family: var(--font-body);
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
         -webkit-appearance: none;
         appearance: none;
     }
 
-    /* Custom date input styling */
+    select {
+        background-color: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2397dffc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.5em;
+        padding-right: 3rem;
+        cursor: pointer;
+    }
+
+    select option {
+        background-color: rgba(0, 0, 0, 0.9);
+        color: #fff;
+        padding: 1rem;
+    }
+
+    select:hover {
+        background-color: rgba(0, 0, 0, 0.9);
+    }
+
+    select:focus {
+        background-color: rgba(0, 0, 0, 0.95);
+        border-color: var(--color-primary);
+    }
+
     input[type="date"]::-webkit-calendar-picker-indicator {
-        position: absolute;
-        right: 1rem;
         filter: invert(1);
-        opacity: 0.6;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        padding: 0.5rem;
-        border-radius: 8px;
+        opacity: 0.7;
     }
 
-    input[type="date"]::-webkit-calendar-picker-indicator:hover {
-        opacity: 0.9;
-        background: rgba(255, 255, 255, 0.1);
-    }
+    @media (max-width: 480px) {
+        .mission-card {
+            padding: 1.5rem;
+        }
 
-    /* Placeholder styling */
-    ::placeholder {
-        color: rgba(255, 255, 255, 0.3);
-        transition: all 0.3s ease;
-    }
+        .mission-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
 
-    .form-control:focus::placeholder {
-        color: rgba(255, 255, 255, 0.5);
-    }
-
-    .submit-button {
-        width: 100%;
-        background: linear-gradient(135deg, #00a3ff 0%, #0066ff 100%);
-        border: none;
-        border-radius: 14px;
-        padding: 1.125rem 1.5rem;
-        color: white;
-        font-family: var(--font-heading);
-        font-weight: 600;
-        font-size: 1.0625rem;
-        letter-spacing: 0.02em;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-top: 1rem;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 
-            0 4px 20px rgba(0, 102, 255, 0.3),
-            0 0 0 1px rgba(255, 255, 255, 0.1);
-    }
-
-    .submit-button::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%);
-        transition: all 0.5s ease;
-    }
-
-    .submit-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 
-            0 8px 30px rgba(0, 102, 255, 0.5),
-            0 0 0 1px rgba(255, 255, 255, 0.2);
-    }
-
-    .submit-button:hover::before {
-        transform: translateY(100%) scale(2);
-    }
-
-    .alert-danger {
-        background: rgba(255, 59, 48, 0.1);
-        border: 1px solid rgba(255, 59, 48, 0.2);
-        color: #ff3b30;
-        padding: 0.875rem 1.125rem;
-        border-radius: 12px;
-        margin-top: 0.75rem;
-        font-size: 0.875rem;
-        font-family: var(--font-body);
-        display: flex;
-        align-items: center;
-        gap: 0.625rem;
-        animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-5px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .form-group:last-of-type {
-        margin-bottom: 1rem;
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
     }
 </style>
 {% endblock %}
@@ -243,73 +254,92 @@
 <div class="stars"></div>
 <div class="mission-container">
     <div class="mission-card">
+        <h2 class="mission-title">New Mission</h2>
         <form method="post">
             {% csrf_token %}
             {% for field in form %}
             <div class="form-group">
-                <label for="{{ field.id_for_label }}" class="form-label">
+                <div class="form-label">
                     {% if field.label == "Rocket name" %}
-                        <i class="fas fa-rocket form-icon"></i>
+                        <i class="fas fa-rocket"></i>
                     {% elif field.label == "Launch date" %}
-                        <i class="fas fa-calendar form-icon"></i>
+                        <i class="fas fa-calendar"></i>
                     {% elif field.label == "Cost million" %}
-                        <i class="fas fa-dollar-sign form-icon"></i>
+                        <i class="fas fa-dollar-sign"></i>
                     {% elif field.label == "Destination" %}
-                        <i class="fas fa-globe form-icon"></i>
+                        <i class="fas fa-globe"></i>
                     {% endif %}
                     {{ field.label }}
-                </label>
-                <div class="form-control-wrapper">
-                    {{ field }}
                 </div>
+                {% if field.label == "Launch date" %}
+                    <input type="date" name="{{ field.name }}" class="form-control" required min="" id="launch_date">
+                {% else %}
+                    {{ field }}
+                {% endif %}
                 {% if field.errors %}
                 <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle"></i>
                     {{ field.errors }}
                 </div>
                 {% endif %}
             </div>
             {% endfor %}
-            <button type="submit" class="submit-button">
-                <i class="fas fa-search-location form-icon"></i>
-                Find Launch Sites
-            </button>
+            <button type="submit" class="submit-button">Find Launch Sites</button>
         </form>
     </div>
 </div>
 
 <script>
-    // Create twinkling stars
     function createStars() {
         const stars = document.querySelector('.stars');
-        const numberOfStars = 150;
-        
-        for (let i = 0; i < numberOfStars; i++) {
+        const count = 150;
+
+        for (let i = 0; i < count; i++) {
             const star = document.createElement('div');
             star.className = 'star';
-            
+
             // Random position
             const x = Math.random() * 100;
             const y = Math.random() * 100;
-            
-            // Random size (slightly larger stars)
-            const size = 0.5 + Math.random() * 2;
-            
+            star.style.left = `${x}%`;
+            star.style.top = `${y}%`;
+
+            // Random size
+            const size = Math.random() * 3 + 1;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+
             // Random duration
-            const duration = 2 + Math.random() * 4;
-            
-            star.style.cssText = `
-                left: ${x}%;
-                top: ${y}%;
-                width: ${size}px;
-                height: ${size}px;
-                --duration: ${duration}s;
-            `;
-            
+            const duration = 1 + Math.random() * 2;
+            star.style.setProperty('--duration', `${duration}s`);
+
+            // Random delay
+            const delay = Math.random() * 2;
+            star.style.animationDelay = `${delay}s`;
+
             stars.appendChild(star);
         }
     }
 
+    // Set minimum date for launch date picker
+    function setMinDate() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const minDate = `${yyyy}-${mm}-${dd}`;
+        
+        const launchDateInput = document.getElementById('launch_date');
+        if (launchDateInput) {
+            launchDateInput.min = minDate;
+            
+            // If the current value is before minimum date, reset it
+            if (launchDateInput.value && launchDateInput.value < minDate) {
+                launchDateInput.value = minDate;
+            }
+        }
+    }
+
     createStars();
+    setMinDate();
 </script>
 {% endblock %} 

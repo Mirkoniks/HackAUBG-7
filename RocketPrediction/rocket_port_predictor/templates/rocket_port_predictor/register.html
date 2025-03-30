@@ -1,7 +1,7 @@
 {% extends 'rocket_port_predictor/base.html' %}
 {% load static %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Register{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -13,7 +13,7 @@
         align-items: center;
         justify-content: center;
         margin: 0;
-        padding: 0;
+        padding: 80px 0;
         position: relative;
         overflow: hidden;
     }
@@ -41,9 +41,9 @@
         100% { opacity: 0; }
     }
 
-    .login-container {
+    .register-container {
         width: 90%;
-        max-width: 420px;
+        max-width: 380px;
         position: relative;
         z-index: 2;
         display: flex;
@@ -62,29 +62,29 @@
         }
     }
 
-    .login-card {
+    .register-card {
         width: 100%;
         background: rgba(0, 0, 0, 0.7);
         border: 1px solid var(--color-border);
-        border-radius: 24px;
-        padding: 3rem;
+        border-radius: 20px;
+        padding: 2rem;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         backdrop-filter: blur(4px);
     }
 
-    .login-title {
+    .register-title {
         font-family: var(--font-heading);
-        font-size: 2rem;
+        font-size: 1.75rem;
         font-weight: 700;
         color: var(--color-primary);
         text-align: center;
-        margin-bottom: 3rem;
+        margin-bottom: 2rem;
         letter-spacing: 0.05em;
         position: relative;
-        padding-bottom: 1rem;
+        padding-bottom: 0.75rem;
     }
 
-    .login-title::after {
+    .register-title::after {
         content: '';
         position: absolute;
         bottom: 0;
@@ -96,7 +96,7 @@
     }
 
     .form-group {
-        margin-bottom: 2rem;
+        margin-bottom: 1.25rem;
         width: 100%;
     }
 
@@ -104,10 +104,10 @@
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.5rem;
         color: var(--color-primary);
         font-family: var(--font-heading);
-        font-size: 1rem;
+        font-size: 0.9rem;
         opacity: 0.9;
     }
 
@@ -123,10 +123,10 @@
         background: rgba(255, 255, 255, 0.05);
         border: 2px solid var(--color-border);
         border-radius: 16px;
-        padding: 1.25rem;
+        padding: 0.875rem;
         color: var(--color-primary);
         font-family: var(--font-body);
-        font-size: 1rem;
+        font-size: 0.9rem;
         transition: all 0.3s ease;
     }
 
@@ -151,16 +151,16 @@
         background: var(--color-primary);
         border: none;
         border-radius: 16px;
-        padding: 1.25rem;
+        padding: 1rem;
         color: var(--color-background);
         font-family: var(--font-heading);
         font-weight: 600;
-        font-size: 1.1rem;
+        font-size: 1rem;
         letter-spacing: 0.1em;
         cursor: pointer;
         transition: all 0.3s ease;
         text-transform: uppercase;
-        margin-top: 2.5rem;
+        margin-top: 1.5rem;
         position: relative;
         overflow: hidden;
     }
@@ -183,17 +183,17 @@
         text-align: center;
     }
 
-    .register-link {
+    .login-link {
         text-align: center;
-        margin-top: 2rem;
+        margin-top: 1.5rem;
         color: var(--color-text-muted);
         font-family: var(--font-body);
-        font-size: 0.95rem;
-        padding-top: 1.5rem;
+        font-size: 0.9rem;
+        padding-top: 1.25rem;
         border-top: 1px solid var(--color-border);
     }
 
-    .register-link a {
+    .login-link a {
         color: var(--color-primary);
         text-decoration: none;
         font-weight: 500;
@@ -201,23 +201,27 @@
         margin-left: 0.5rem;
     }
 
-    .register-link a:hover {
+    .login-link a:hover {
         color: var(--color-text-muted);
         text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     }
 
     @media (max-width: 480px) {
-        .login-card {
-            padding: 2rem;
+        body {
+            padding: 60px 0;
         }
 
-        .login-title {
-            font-size: 1.75rem;
-            margin-bottom: 2rem;
+        .register-card {
+            padding: 1.5rem;
+        }
+
+        .register-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
     }
 </style>
@@ -225,9 +229,9 @@
 
 {% block content %}
 <div class="stars"></div>
-<div class="login-container">
-    <div class="login-card">
-        <h2 class="login-title">Welcome Back</h2>
+<div class="register-container">
+    <div class="register-card">
+        <h2 class="register-title">Join OptiLaunch</h2>
         <form method="post">
             {% csrf_token %}
             <div class="form-group">
@@ -235,24 +239,42 @@
                     <i class="fas fa-user"></i>
                     Username
                 </div>
-                <input type="text" name="username" class="form-control" placeholder="Enter your username" required>
+                <input type="text" name="username" class="form-control" placeholder="Choose a username" required>
+            </div>
+            <div class="form-group">
+                <div class="form-label">
+                    <i class="fas fa-envelope"></i>
+                    Email
+                </div>
+                <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
             </div>
             <div class="form-group">
                 <div class="form-label">
                     <i class="fas fa-lock"></i>
                     Password
                 </div>
-                <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+                <input type="password" name="password1" class="form-control" placeholder="Create a password" required>
+            </div>
+            <div class="form-group">
+                <div class="form-label">
+                    <i class="fas fa-lock"></i>
+                    Confirm Password
+                </div>
+                <input type="password" name="password2" class="form-control" placeholder="Confirm password" required>
             </div>
             {% if form.errors %}
             <div class="alert alert-danger">
-                Invalid username or password. Please try again.
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        {{ error }}
+                    {% endfor %}
+                {% endfor %}
             </div>
             {% endif %}
-            <button type="submit" class="submit-button">Sign In</button>
+            <button type="submit" class="submit-button">Create Account</button>
         </form>
-        <div class="register-link">
-            New to OptiLaunch?<a href="{% url 'rocket_port_predictor:register' %}">Create an account</a>
+        <div class="login-link">
+            Already have an account?<a href="{% url 'rocket_port_predictor:login' %}">Sign in here</a>
         </div>
     </div>
 </div>
