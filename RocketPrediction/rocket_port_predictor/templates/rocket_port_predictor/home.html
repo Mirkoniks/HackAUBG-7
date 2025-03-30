@@ -5,167 +5,152 @@
 
 {% block extra_css %}
 <style>
-    .hero-section {
-        min-height: 100vh;
-        background: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') center/cover no-repeat;
+    .hero {
         position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        color: white;
-        padding: 4rem 0;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
     }
 
-    .hero-section::before {
-        content: '';
+    .hero-image {
         position: absolute;
         top: 0;
         left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(10, 10, 31, 0.7);
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
         z-index: 1;
     }
 
-    .hero-content {
-        position: relative;
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
         z-index: 2;
-        max-width: 800px;
-        margin: 0 auto;
+    }
+
+    .hero-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 3;
+        width: 100%;
+        text-align: center;
+        padding: 0 2rem;
     }
 
     .hero-title {
-        font-family: 'Orbitron', sans-serif;
-        font-size: 3.5rem;
-        font-weight: 700;
-        margin-bottom: 1.5rem;
-        text-shadow: 0 0 20px var(--glow-color);
-        animation: glow 2s ease-in-out infinite alternate;
-    }
-
-    .hero-subtitle {
-        font-family: 'Exo', sans-serif;
-        font-size: 1.5rem;
-        margin-bottom: 2rem;
-        opacity: 0.9;
-    }
-
-    .features-section {
-        background: var(--space-black);
-        padding: 4rem 0;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .feature-card {
-        background: rgba(26, 27, 59, 0.8);
-        border: 1px solid rgba(52, 152, 219, 0.3);
-        border-radius: 15px;
-        padding: 2rem;
-        height: 100%;
-        transition: all 0.3s ease;
-        backdrop-filter: blur(10px);
-    }
-
-    .feature-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 0 30px var(--glow-color);
-    }
-
-    .feature-card .card-title {
-        font-family: 'Orbitron', sans-serif;
-        color: var(--cosmic-blue);
-        margin-bottom: 1rem;
-    }
-
-    .feature-card .card-text {
-        color: #ffffff;
-        opacity: 0.9;
-    }
-
-    .cta-button {
-        background: linear-gradient(135deg, var(--cosmic-blue) 0%, var(--cosmic-purple) 100%);
-        border: none;
-        padding: 1rem 2.5rem;
-        font-size: 1.2rem;
-        font-family: 'Orbitron', sans-serif;
+        font-family: var(--font-heading);
+        font-size: 5rem;
+        font-weight: 600;
+        margin: 0;
+        line-height: 1.1;
+        letter-spacing: 0.01em;
         text-transform: uppercase;
-        letter-spacing: 2px;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
     }
 
-    .cta-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0 30px var(--glow-color);
+    .scroll-hint {
+        font-family: var(--font-heading);
+        position: absolute;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 3;
+        opacity: 0.7;
+        font-size: 0.875rem;
+        letter-spacing: 0.1em;
+        font-weight: 500;
+        text-transform: uppercase;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
     }
 
-    @keyframes glow {
-        from {
-            text-shadow: 0 0 10px var(--glow-color);
+    .scroll-arrow {
+        width: 20px;
+        height: 20px;
+        border: solid #fff;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0) rotate(45deg);
         }
-        to {
-            text-shadow: 0 0 20px var(--cosmic-blue), 0 0 30px var(--cosmic-purple);
+        40% {
+            transform: translateY(-10px) rotate(45deg);
+        }
+        60% {
+            transform: translateY(-5px) rotate(45deg);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 3rem;
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<section class="hero-section">
+<div class="hero">
+    <img 
+        src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
+        alt="Earth from space"
+        class="hero-image"
+    >
+    <div class="hero-overlay"></div>
     <div class="hero-content">
-        <h1 class="hero-title">Welcome to Spaceport Predictor</h1>
-        <p class="hero-subtitle">Find the optimal spaceport location for your next space mission using advanced AI predictions.</p>
-        
-        {% if user.is_authenticated %}
-        <div class="mt-4">
-            <a href="{% url 'rocket_port_predictor:mission_form' %}" class="btn btn-primary btn-lg cta-button">
-                <i class="fas fa-rocket me-2"></i>Start New Mission
-            </a>
-        </div>
-        {% else %}
-        <div class="mt-4">
-            <a href="{% url 'rocket_port_predictor:login' %}" class="btn btn-primary btn-lg cta-button">
-                <i class="fas fa-sign-in-alt me-2"></i>Login to Start
-            </a>
-        </div>
-        {% endif %}
+        <h1 class="hero-title">CAPITALIZING THE SPACE!</h1>
     </div>
-</section>
+    <div class="scroll-hint">
+        Scroll to explore
+        <div class="scroll-arrow"></div>
+    </div>
+</div>
+{% endblock %}
 
-<section class="features-section">
-    <div class="container">
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <h5 class="card-title">
-                        <i class="fas fa-brain me-2"></i>
-                        AI-Powered Predictions
-                    </h5>
-                    <p class="card-text">Our advanced machine learning models analyze mission parameters to recommend the best spaceport locations.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <h5 class="card-title">
-                        <i class="fas fa-cloud-sun me-2"></i>
-                        Weather Analysis
-                    </h5>
-                    <p class="card-text">Get detailed weather predictions for each recommended spaceport location.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <h5 class="card-title">
-                        <i class="fas fa-map-marked-alt me-2"></i>
-                        Interactive Maps
-                    </h5>
-                    <p class="card-text">Visualize spaceport locations and weather conditions on an interactive map.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+{% block extra_js %}
+<script>
+    let scrolling = false;
+
+    function navigateToMission() {
+        if (!scrolling) {
+            scrolling = true;
+            window.location.href = "{% url 'rocket_port_predictor:mission_form' %}";
+        }
+    }
+
+    // Handle scroll
+    window.addEventListener('wheel', function(e) {
+        if (e.deltaY > 0) {
+            navigateToMission();
+        }
+    }, { passive: true });
+
+    // Handle touch
+    let touchStart = 0;
+    window.addEventListener('touchstart', function(e) {
+        touchStart = e.touches[0].clientY;
+    }, { passive: true });
+
+    window.addEventListener('touchmove', function(e) {
+        if (!touchStart) return;
+        
+        const touchEnd = e.touches[0].clientY;
+        const diff = touchStart - touchEnd;
+        
+        if (diff > 50) {
+            navigateToMission();
+        }
+    }, { passive: true });
+</script>
 {% endblock %} 

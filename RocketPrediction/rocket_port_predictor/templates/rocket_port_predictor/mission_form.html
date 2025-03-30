@@ -6,172 +6,310 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
-    .dashboard {
-        min-height: 100vh;
-        padding: 2rem 0;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        position: relative;
-    }
-    .page-header {
-        background: linear-gradient(135deg, var(--space-purple) 0%, var(--space-blue) 100%);
-        color: white;
-        padding: 2rem 0;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        position: relative;
+    body {
         overflow: hidden;
     }
-    .page-header::before {
-        content: '';
+
+    .stars {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        background: black;
+        z-index: 0;
+    }
+
+    .star {
         position: absolute;
+        background: white;
+        border-radius: 50%;
+        animation: twinkle var(--duration) infinite;
+    }
+
+    @keyframes twinkle {
+        0%, 100% { opacity: 0; }
+        50% { opacity: 1; }
+    }
+
+    .mission-container {
+        position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: url('https://images.unsplash.com/photo-1446776811953-b23d0bd71f51?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') center/cover;
-        opacity: 0.1;
-        z-index: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
     }
-    .page-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        text-shadow: 0 0 10px var(--glow-color);
-    }
-    .page-subtitle {
-        opacity: 0.9;
-        font-size: 1.1rem;
-    }
+
     .mission-card {
-        background: rgba(26, 27, 59, 0.8);
-        border: 1px solid rgba(52, 152, 219, 0.3);
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        background: rgba(13, 14, 30, 0.85);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 3rem;
+        width: 90%;
+        max-width: 460px;
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.1);
+        transform: translateY(-2vh);
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .form-group:hover .form-label {
+        color: #00a3ff;
+        transform: translateY(-0.125rem);
+    }
+
+    .form-label {
+        font-family: var(--font-heading);
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        font-size: 0.9375rem;
+        letter-spacing: 0.02em;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-control {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.03);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        padding: 1rem 1.25rem;
+        color: white;
+        font-family: var(--font-body);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 
+            inset 0 2px 4px rgba(0, 0, 0, 0.1),
+            0 0 0 transparent;
+    }
+
+    .form-control:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(0, 163, 255, 0.3);
+        box-shadow: 
+            inset 0 2px 4px rgba(0, 0, 0, 0.1),
+            0 0 15px rgba(0, 163, 255, 0.1);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: rgba(0, 163, 255, 0.5);
+        background: rgba(255, 255, 255, 0.07);
+        box-shadow: 
+            inset 0 2px 4px rgba(0, 0, 0, 0.1),
+            0 0 0 4px rgba(0, 163, 255, 0.15),
+            0 0 20px rgba(0, 163, 255, 0.1);
+    }
+
+    .form-icon {
+        font-size: 1.125rem;
+        margin-right: 0.75rem;
+        color: #00a3ff;
+        transition: all 0.3s ease;
+        filter: drop-shadow(0 0 8px rgba(0, 163, 255, 0.3));
+    }
+
+    .form-group:hover .form-icon {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 12px rgba(0, 163, 255, 0.4));
+    }
+
+    /* Style form fields */
+    input[type="text"],
+    input[type="number"],
+    input[type="date"] {
+        font-family: var(--font-body);
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    /* Custom date input styling */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        position: absolute;
+        right: 1rem;
+        filter: invert(1);
+        opacity: 0.6;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 0.5rem;
+        border-radius: 8px;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator:hover {
+        opacity: 0.9;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Placeholder styling */
+    ::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .submit-button {
+        width: 100%;
+        background: linear-gradient(135deg, #00a3ff 0%, #0066ff 100%);
+        border: none;
+        border-radius: 14px;
+        padding: 1.125rem 1.5rem;
+        color: white;
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 1.0625rem;
+        letter-spacing: 0.02em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
         position: relative;
         overflow: hidden;
-        backdrop-filter: blur(10px);
-        margin: auto;
-        max-width: 800px;
-        width: 100%;
+        box-shadow: 
+            0 4px 20px rgba(0, 102, 255, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.1);
     }
-    .mission-card::before {
+
+    .submit-button::before {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
-        height: 4px;
-        background: linear-gradient(90deg, var(--cosmic-blue), var(--cosmic-purple));
+        height: 100%;
+        background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%);
+        transition: all 0.5s ease;
     }
-    .form-label {
-        font-weight: 600;
-        color: #ffffff;
-        margin-bottom: 0.5rem;
-        font-family: 'Orbitron', sans-serif;
-    }
-    .form-control {
-        background-color: rgba(26, 27, 59, 0.8);
-        border: 1px solid rgba(52, 152, 219, 0.3);
-        color: #ffffff;
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
-        transition: all 0.3s ease;
-    }
-    .form-control:focus {
-        background-color: rgba(26, 27, 59, 0.9);
-        border-color: var(--cosmic-blue);
-        box-shadow: 0 0 15px var(--glow-color);
-    }
-    .submit-button {
-        background: linear-gradient(135deg, var(--cosmic-blue) 0%, var(--cosmic-purple) 100%);
-        border: none;
-        border-radius: 8px;
-        padding: 1rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: all 0.3s ease;
-        width: 100%;
-    }
+
     .submit-button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 0 20px var(--glow-color);
+        box-shadow: 
+            0 8px 30px rgba(0, 102, 255, 0.5),
+            0 0 0 1px rgba(255, 255, 255, 0.2);
     }
-    .submit-button i {
-        margin-right: 8px;
+
+    .submit-button:hover::before {
+        transform: translateY(100%) scale(2);
     }
+
     .alert-danger {
-        background-color: rgba(231, 76, 60, 0.1);
-        border: 1px solid rgba(231, 76, 60, 0.3);
-        color: #e74c3c;
-        padding: 0.75rem 1rem;
-        margin-top: 0.5rem;
-        font-size: 0.9rem;
-        border-radius: 8px;
+        background: rgba(255, 59, 48, 0.1);
+        border: 1px solid rgba(255, 59, 48, 0.2);
+        color: #ff3b30;
+        padding: 0.875rem 1.125rem;
+        border-radius: 12px;
+        margin-top: 0.75rem;
+        font-size: 0.875rem;
+        font-family: var(--font-body);
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        animation: fadeIn 0.3s ease;
     }
-    .alert-danger::before {
-        content: '\f071';
-        font-family: 'Font Awesome 6 Free';
-        font-weight: 900;
-        margin-right: 8px;
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group:last-of-type {
+        margin-bottom: 1rem;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="dashboard">
-    <div class="page-header">
-        <div class="container">
-            <div class="row">
-                <div class="col text-center">
-                    <h1 class="page-title">Plan Your Space Mission</h1>
-                    <p class="page-subtitle">Enter your mission details to find the perfect launch site</p>
+<div class="stars"></div>
+<div class="mission-container">
+    <div class="mission-card">
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}" class="form-label">
+                    {% if field.label == "Rocket name" %}
+                        <i class="fas fa-rocket form-icon"></i>
+                    {% elif field.label == "Launch date" %}
+                        <i class="fas fa-calendar form-icon"></i>
+                    {% elif field.label == "Cost million" %}
+                        <i class="fas fa-dollar-sign form-icon"></i>
+                    {% elif field.label == "Destination" %}
+                        <i class="fas fa-globe form-icon"></i>
+                    {% endif %}
+                    {{ field.label }}
+                </label>
+                <div class="form-control-wrapper">
+                    {{ field }}
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="mission-card">
-                    <form method="post">
-                        {% csrf_token %}
-                        {% for field in form %}
-                        <div class="mb-4">
-                            <label for="{{ field.id_for_label }}" class="form-label">
-                                {% if field.label == "Rocket name" %}
-                                    <i class="fas fa-rocket"></i>
-                                {% elif field.label == "Launch date" %}
-                                    <i class="fas fa-calendar"></i>
-                                {% elif field.label == "Cost million" %}
-                                    <i class="fas fa-dollar-sign"></i>
-                                {% elif field.label == "Destination" %}
-                                    <i class="fas fa-globe"></i>
-                                {% endif %}
-                                {{ field.label }}
-                            </label>
-                            {{ field }}
-                            {% if field.errors %}
-                            <div class="alert alert-danger">
-                                {{ field.errors }}
-                            </div>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
-                        <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-primary submit-button">
-                                <i class="fas fa-search-location"></i>
-                                Find Launch Sites
-                            </button>
-                        </div>
-                    </form>
+                {% if field.errors %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ field.errors }}
                 </div>
+                {% endif %}
             </div>
-        </div>
+            {% endfor %}
+            <button type="submit" class="submit-button">
+                <i class="fas fa-search-location form-icon"></i>
+                Find Launch Sites
+            </button>
+        </form>
     </div>
 </div>
+
+<script>
+    // Create twinkling stars
+    function createStars() {
+        const stars = document.querySelector('.stars');
+        const numberOfStars = 150;
+        
+        for (let i = 0; i < numberOfStars; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            
+            // Random position
+            const x = Math.random() * 100;
+            const y = Math.random() * 100;
+            
+            // Random size (slightly larger stars)
+            const size = 0.5 + Math.random() * 2;
+            
+            // Random duration
+            const duration = 2 + Math.random() * 4;
+            
+            star.style.cssText = `
+                left: ${x}%;
+                top: ${y}%;
+                width: ${size}px;
+                height: ${size}px;
+                --duration: ${duration}s;
+            `;
+            
+            stars.appendChild(star);
+        }
+    }
+
+    createStars();
+</script>
 {% endblock %} 
