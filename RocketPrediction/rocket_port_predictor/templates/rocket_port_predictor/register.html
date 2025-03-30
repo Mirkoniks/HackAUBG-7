@@ -1,0 +1,316 @@
+{% extends 'rocket_port_predictor/base.html' %}
+{% load static %}
+
+{% block title %}Register{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: var(--color-background);
+        min-height: 100vh;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding: 80px 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stars {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .star {
+        position: absolute;
+        background: var(--color-primary);
+        border-radius: 50%;
+        animation: twinkle var(--duration) ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+        0% { opacity: 0; }
+        50% { opacity: 1; }
+        100% { opacity: 0; }
+    }
+
+    .register-container {
+        width: 90%;
+        max-width: 380px;
+        position: relative;
+        z-index: 2;
+        display: flex;
+        justify-content: center;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .register-card {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid var(--color-border);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(4px);
+    }
+
+    .register-title {
+        font-family: var(--font-heading);
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--color-primary);
+        text-align: center;
+        margin-bottom: 2rem;
+        letter-spacing: 0.05em;
+        position: relative;
+        padding-bottom: 0.75rem;
+    }
+
+    .register-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 2px;
+        background: var(--color-primary);
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+        width: 100%;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+        color: var(--color-primary);
+        font-family: var(--font-heading);
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .form-label i {
+        font-size: 1.25rem;
+        width: 24px;
+        text-align: center;
+    }
+
+    .form-control {
+        width: 100%;
+        box-sizing: border-box;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid var(--color-border);
+        border-radius: 16px;
+        padding: 0.875rem;
+        color: var(--color-primary);
+        font-family: var(--font-body);
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control::placeholder {
+        color: var(--color-text-muted);
+    }
+
+    .form-control:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .form-control:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+    }
+
+    .submit-button {
+        width: 100%;
+        background: var(--color-primary);
+        border: none;
+        border-radius: 16px;
+        padding: 1rem;
+        color: var(--color-background);
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 1rem;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        margin-top: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-button:hover {
+        background: var(--color-text-muted);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+    }
+
+    .alert-danger {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--color-primary);
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        font-family: var(--font-body);
+        text-align: center;
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: var(--color-text-muted);
+        font-family: var(--font-body);
+        font-size: 0.9rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--color-border);
+    }
+
+    .login-link a {
+        color: var(--color-primary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+        margin-left: 0.5rem;
+    }
+
+    .login-link a:hover {
+        color: var(--color-text-muted);
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    @media (max-width: 480px) {
+        body {
+            padding: 60px 0;
+        }
+
+        .register-card {
+            padding: 1.5rem;
+        }
+
+        .register-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="stars"></div>
+<div class="register-container">
+    <div class="register-card">
+        <h2 class="register-title">Join OptiLaunch</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <div class="form-label">
+                    <i class="fas fa-user"></i>
+                    Username
+                </div>
+                <input type="text" name="username" class="form-control" placeholder="Choose a username" required>
+            </div>
+            <div class="form-group">
+                <div class="form-label">
+                    <i class="fas fa-envelope"></i>
+                    Email
+                </div>
+                <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <div class="form-label">
+                    <i class="fas fa-lock"></i>
+                    Password
+                </div>
+                <input type="password" name="password1" class="form-control" placeholder="Create a password" required>
+            </div>
+            <div class="form-group">
+                <div class="form-label">
+                    <i class="fas fa-lock"></i>
+                    Confirm Password
+                </div>
+                <input type="password" name="password2" class="form-control" placeholder="Confirm password" required>
+            </div>
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        {{ error }}
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            {% endif %}
+            <button type="submit" class="submit-button">Create Account</button>
+        </form>
+        <div class="login-link">
+            Already have an account?<a href="{% url 'rocket_port_predictor:login' %}">Sign in here</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function createStars() {
+        const stars = document.querySelector('.stars');
+        const count = 150;
+
+        for (let i = 0; i < count; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+
+            // Random position
+            const x = Math.random() * 100;
+            const y = Math.random() * 100;
+            star.style.left = `${x}%`;
+            star.style.top = `${y}%`;
+
+            // Random size
+            const size = Math.random() * 3 + 1;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+
+            // Random duration
+            const duration = 1 + Math.random() * 2;
+            star.style.setProperty('--duration', `${duration}s`);
+
+            // Random delay
+            const delay = Math.random() * 2;
+            star.style.animationDelay = `${delay}s`;
+
+            stars.appendChild(star);
+        }
+    }
+
+    createStars();
+</script>
+{% endblock %} 

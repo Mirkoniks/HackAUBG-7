@@ -1,0 +1,345 @@
+{% extends 'rocket_port_predictor/base.html' %}
+{% load static %}
+
+{% block title %}New Mission{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: var(--color-background);
+        min-height: 100vh;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding: 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stars {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .star {
+        position: absolute;
+        background: var(--color-primary);
+        border-radius: 50%;
+        animation: twinkle var(--duration) ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+        0% { opacity: 0; }
+        50% { opacity: 1; }
+        100% { opacity: 0; }
+    }
+
+    .mission-container {
+        width: 90%;
+        max-width: 380px;
+        position: relative;
+        z-index: 2;
+        display: flex;
+        justify-content: center;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .mission-card {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid var(--color-border);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(4px);
+    }
+
+    .mission-title {
+        font-family: var(--font-heading);
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--color-primary);
+        text-align: center;
+        margin-bottom: 2rem;
+        letter-spacing: 0.05em;
+        position: relative;
+        padding-bottom: 0.75rem;
+    }
+
+    .mission-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 2px;
+        background: var(--color-primary);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+        width: 100%;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+        color: var(--color-primary);
+        font-family: var(--font-heading);
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .form-label i {
+        font-size: 1.25rem;
+        width: 24px;
+        text-align: center;
+    }
+
+    .form-control {
+        width: 100%;
+        box-sizing: border-box;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid var(--color-border);
+        border-radius: 16px;
+        padding: 1rem;
+        color: var(--color-primary);
+        font-family: var(--font-body);
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control::placeholder {
+        color: var(--color-text-muted);
+    }
+
+    .form-control:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .form-control:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+    }
+
+    .submit-button {
+        width: 100%;
+        background: var(--color-primary);
+        border: none;
+        border-radius: 16px;
+        padding: 1rem;
+        color: var(--color-background);
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 1rem;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        margin-top: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-button:hover {
+        background: var(--color-text-muted);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+    }
+
+    .alert-danger {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--color-primary);
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        font-family: var(--font-body);
+        text-align: center;
+    }
+
+    /* Style form fields */
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    select {
+        width: 100%;
+        box-sizing: border-box;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid var(--color-border);
+        border-radius: 16px;
+        padding: 1rem;
+        color: var(--color-primary);
+        font-family: var(--font-body);
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    select {
+        background-color: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2397dffc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.5em;
+        padding-right: 3rem;
+        cursor: pointer;
+    }
+
+    select option {
+        background-color: rgba(0, 0, 0, 0.9);
+        color: #fff;
+        padding: 1rem;
+    }
+
+    select:hover {
+        background-color: rgba(0, 0, 0, 0.9);
+    }
+
+    select:focus {
+        background-color: rgba(0, 0, 0, 0.95);
+        border-color: var(--color-primary);
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        opacity: 0.7;
+    }
+
+    @media (max-width: 480px) {
+        .mission-card {
+            padding: 1.5rem;
+        }
+
+        .mission-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="stars"></div>
+<div class="mission-container">
+    <div class="mission-card">
+        <h2 class="mission-title">New Mission</h2>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <div class="form-label">
+                    {% if field.label == "Rocket name" %}
+                        <i class="fas fa-rocket"></i>
+                    {% elif field.label == "Launch date" %}
+                        <i class="fas fa-calendar"></i>
+                    {% elif field.label == "Cost million" %}
+                        <i class="fas fa-dollar-sign"></i>
+                    {% elif field.label == "Destination" %}
+                        <i class="fas fa-globe"></i>
+                    {% endif %}
+                    {{ field.label }}
+                </div>
+                {% if field.label == "Launch date" %}
+                    <input type="date" name="{{ field.name }}" class="form-control" required min="" id="launch_date">
+                {% else %}
+                    {{ field }}
+                {% endif %}
+                {% if field.errors %}
+                <div class="alert alert-danger">
+                    {{ field.errors }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="submit-button">Find Launch Sites</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function createStars() {
+        const stars = document.querySelector('.stars');
+        const count = 150;
+
+        for (let i = 0; i < count; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+
+            // Random position
+            const x = Math.random() * 100;
+            const y = Math.random() * 100;
+            star.style.left = `${x}%`;
+            star.style.top = `${y}%`;
+
+            // Random size
+            const size = Math.random() * 3 + 1;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+
+            // Random duration
+            const duration = 1 + Math.random() * 2;
+            star.style.setProperty('--duration', `${duration}s`);
+
+            // Random delay
+            const delay = Math.random() * 2;
+            star.style.animationDelay = `${delay}s`;
+
+            stars.appendChild(star);
+        }
+    }
+
+    // Set minimum date for launch date picker
+    function setMinDate() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const minDate = `${yyyy}-${mm}-${dd}`;
+        
+        const launchDateInput = document.getElementById('launch_date');
+        if (launchDateInput) {
+            launchDateInput.min = minDate;
+            
+            // If the current value is before minimum date, reset it
+            if (launchDateInput.value && launchDateInput.value < minDate) {
+                launchDateInput.value = minDate;
+            }
+        }
+    }
+
+    createStars();
+    setMinDate();
+</script>
+{% endblock %} 

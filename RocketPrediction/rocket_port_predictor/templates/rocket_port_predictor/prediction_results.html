@@ -1,0 +1,344 @@
+{% extends 'rocket_port_predictor/base.html' %}
+{% load static %}
+
+{% block title %}Launch Site Recommendations{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    body {
+        overflow: hidden;
+    }
+
+    .stars {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        background: black;
+        z-index: 0;
+    }
+
+    .star {
+        position: absolute;
+        background: white;
+        border-radius: 50%;
+        animation: twinkle var(--duration) infinite;
+    }
+
+    @keyframes twinkle {
+        0%, 100% { opacity: 0; }
+        50% { opacity: 1; }
+    }
+
+    .dashboard {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+    }
+
+    .container {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        margin: 0;
+    }
+
+    #map-container {
+        position: relative;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.5),
+            0 0 0 1px rgba(255, 255, 255, 0.1);
+        margin: 0;
+        background: rgba(13, 14, 30, 0.85);
+        backdrop-filter: blur(20px);
+        height: 70vh;
+        width: 80%;
+        max-width: 1200px;
+        margin: 0 auto;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #map {
+        height: 100%;
+        width: 100%;
+        z-index: 1;
+    }
+
+    #map-loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+        background: rgba(13, 14, 30, 0.95);
+        padding: 1.5rem 2.5rem;
+        border-radius: 30px;
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.1);
+        font-weight: 500;
+        color: white;
+        letter-spacing: 0.05em;
+    }
+
+    #map-loading i {
+        color: #97dffc;
+        margin-right: 8px;
+    }
+
+    /* Custom styles for Leaflet controls */
+    .leaflet-control-container {
+        z-index: 1000;
+    }
+
+    .leaflet-control-zoom {
+        border: none !important;
+        background: rgba(13, 14, 30, 0.85) !important;
+        backdrop-filter: blur(20px);
+        border-radius: 8px !important;
+        overflow: hidden;
+    }
+
+    .leaflet-control-zoom a {
+        color: white !important;
+        background: transparent !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .leaflet-control-zoom a:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    /* Custom styles for popups */
+    .leaflet-popup-content-wrapper {
+        background: white !important;
+        color: #333 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .leaflet-popup-tip {
+        background: white !important;
+    }
+
+    .leaflet-popup-content {
+        margin: 16px !important;
+    }
+
+    .leaflet-popup-content h6 {
+        color: #333 !important;
+        margin: 0 0 12px 0 !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.02em !important;
+        font-size: 1.2rem !important;
+        line-height: 1.4 !important;
+        border-bottom: 2px solid #613dc1 !important;
+        padding-bottom: 8px !important;
+    }
+
+    .leaflet-popup-content .popup-stats {
+        background: #f8f9fa !important;
+        padding: 12px !important;
+        border-radius: 8px !important;
+        margin-bottom: 12px !important;
+        border: 1px solid #e9ecef !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+
+    .leaflet-popup-content .popup-stats i {
+        color: #613dc1 !important;
+        font-size: 1.1rem !important;
+    }
+
+    .leaflet-popup-content .popup-stats strong {
+        color: #333 !important;
+        font-size: 1.1rem !important;
+    }
+
+    .leaflet-popup-content .weather-info {
+        background: #f8f9fa !important;
+        padding: 12px !important;
+        border-radius: 8px !important;
+        border: 1px solid #e9ecef !important;
+    }
+
+    .leaflet-popup-content .weather-info p {
+        color: #333 !important;
+        margin: 8px 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        font-size: 0.95rem !important;
+    }
+
+    .leaflet-popup-content .weather-info i {
+        color: #613dc1 !important;
+        width: 20px !important;
+        font-size: 1.1rem !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="stars"></div>
+<div class="dashboard">
+    <div class="container">
+        <!-- Map Container -->
+        <div id="map-container">
+            <div id="map"></div>
+            <div id="map-loading">
+                <i class="fas fa-spinner fa-spin"></i> Loading launch sites...
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Create twinkling stars
+    function createStars() {
+        const stars = document.querySelector('.stars');
+        const numberOfStars = 150;
+        
+        for (let i = 0; i < numberOfStars; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            
+            // Random position
+            const x = Math.random() * 100;
+            const y = Math.random() * 100;
+            
+            // Random size (slightly larger stars)
+            const size = 0.5 + Math.random() * 2;
+            
+            // Random duration
+            const duration = 2 + Math.random() * 4;
+            
+            star.style.cssText = `
+                left: ${x}%;
+                top: ${y}%;
+                width: ${size}px;
+                height: ${size}px;
+                --duration: ${duration}s;
+            `;
+            
+            stars.appendChild(star);
+        }
+    }
+
+    // Initialize everything
+    createStars();
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize the map with a custom style
+        var map = L.map('map', {
+            zoomControl: false
+        });
+        
+        // Add zoom control to the right
+        L.control.zoom({
+            position: 'topright'
+        }).addTo(map);
+        
+        // Add a dark-themed tile layer
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '©OpenStreetMap, ©CartoDB',
+            maxZoom: 19
+        }).addTo(map);
+
+        var markers = [];
+        var bounds = L.latLngBounds();
+        
+        // Custom icon for markers with simplified design
+        var customIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: "<div style='background-color:#613dc1; width: 36px; height: 36px; border-radius: 50%; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.3);'></div><i class='fas fa-rocket' style='color:white; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 18px;'></i>",
+            iconSize: [36, 36],
+            iconAnchor: [18, 18]
+        });
+        
+        // Add markers for each spaceport
+        {% for spaceport in spaceports %}
+            var lat = {{ spaceport.coordinates.0 }};
+            var lng = {{ spaceport.coordinates.1 }};
+            
+            var marker = L.marker([lat, lng], {
+                icon: customIcon
+            }).addTo(map);
+            
+            // Create a custom popup with improved styling
+            var popupContent = `
+                <div style="min-width: 280px; color: #333; font-family: var(--font-body);">
+                    <h6>{{ spaceport.name }}</h6>
+                    <div class="popup-stats">
+                        <i class="fas fa-chart-bar"></i>
+                        <strong>{{ spaceport.probability }}%</strong> match
+                    </div>
+                    <div class="weather-info">
+                        <p>
+                            <i class="fas fa-thermometer-half"></i>
+                            {{ spaceport.weather.temperature }}°C
+                        </p>
+                        <p>
+                            <i class="fas fa-wind"></i>
+                            {{ spaceport.weather.wind_speed }} km/h
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+            markers.push(marker);
+            bounds.extend([lat, lng]);
+        {% endfor %}
+        
+        // If we have markers, fit the map to show all of them
+        if (markers.length > 0) {
+            map.fitBounds(bounds, {
+                padding: [50, 50],
+                maxZoom: 12
+            });
+        } else {
+            map.setView([0, 0], 2);
+        }
+
+        // Hide loading indicator once map is ready
+        map.once('load', function() {
+            document.getElementById('map-loading').style.display = 'none';
+        });
+        
+        // Fallback for the loading indicator
+        setTimeout(function() {
+            document.getElementById('map-loading').style.display = 'none';
+        }, 2000);
+
+        // Force map to resize when window size changes
+        window.addEventListener('resize', function() {
+            map.invalidateSize();
+        });
+    });
+</script>
+{% endblock %} 
