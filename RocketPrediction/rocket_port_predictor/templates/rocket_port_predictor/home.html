@@ -1,0 +1,49 @@
+{% extends 'rocket_port_predictor/base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2 text-center">
+        <h1 class="display-4 mb-4">Welcome to Spaceport Predictor</h1>
+        <p class="lead">Find the optimal spaceport location for your next space mission using advanced AI predictions.</p>
+        
+        {% if user.is_authenticated %}
+        <div class="mt-4">
+            <a href="{% url 'mission_form' %}" class="btn btn-primary btn-lg">Start New Mission</a>
+        </div>
+        {% else %}
+        <div class="mt-4">
+            <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Login to Start</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">AI-Powered Predictions</h5>
+                <p class="card-text">Our advanced machine learning models analyze mission parameters to recommend the best spaceport locations.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Weather Analysis</h5>
+                <p class="card-text">Get detailed weather predictions for each recommended spaceport location.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Interactive Maps</h5>
+                <p class="card-text">Visualize spaceport locations and weather conditions on an interactive map.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

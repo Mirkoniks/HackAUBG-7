@@ -1,0 +1,163 @@
+{% extends 'rocket_port_predictor/base.html' %}
+
+{% block title %}Prediction Results{% endblock %}
+
+{% block extra_css %}
+<style>
+    #map {
+        height: 500px;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .spaceport-card {
+        margin-bottom: 20px;
+        transition: transform 0.2s;
+    }
+    .spaceport-card:hover {
+        transform: translateY(-5px);
+    }
+    .probability-badge {
+        font-size: 1.2em;
+        padding: 5px 10px;
+        border-radius: 15px;
+    }
+    .weather-info {
+        color: #666;
+        font-style: italic;
+    }
+    .location-list {
+        margin-top: 20px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+    }
+    .debug-info {
+        padding: 10px;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        margin: 10px 0;
+        font-family: monospace;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="text-center mb-4">Recommended Spaceport Locations</h2>
+        
+        <!-- Debug information -->
+        <div class="debug-info">
+            <p>Debug - Number of spaceports: {{ spaceports|length }}</p>
+            {% for spaceport in spaceports %}
+            <p>Debug - Spaceport: {{ spaceport }}</p>
+            {% endfor %}
+        </div>
+        
+        <!-- Text display of locations -->
+        {% if spaceports %}
+        <div class="location-list">
+            <h3 class="text-center mb-3">Top 3 Recommended Locations:</h3>
+            {% for spaceport in spaceports %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ spaceport.name }}</h5>
+                    <p class="card-text">
+                        <strong>Match Probability:</strong> {{ spaceport.probability }}%<br>
+                        <strong>Coordinates:</strong> {{ spaceport.coordinates.0 }}, {{ spaceport.coordinates.1 }}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+            No spaceport predictions available. Please try submitting the form again.
+        </div>
+        {% endif %}
+
+        <!-- Map display -->
+        <div id="map"></div>
+    </div>
+</div>
+
+<div class="row">
+    {% for spaceport in spaceports %}
+    <div class="col-md-4">
+        <div class="card spaceport-card">
+            <div class="card-body">
+                <h5 class="card-title">{{ spaceport.name }}</h5>
+                <div class="text-center mb-3">
+                    <span class="badge bg-primary probability-badge">
+                        {{ spaceport.probability }}% Match
+                    </span>
+                </div>
+                <div class="weather-info">
+                    <p class="mb-0">Weather information coming soon...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{% url 'mission_form' %}" class="btn btn-primary">Start New Mission</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize the map centered on the US
+    var map = L.map('map').setView([39.8283, -98.5795], 4);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Store coordinates for bounds calculation
+    var allCoordinates = [];
+
+    // Add markers for each spaceport
+    {% for spaceport in spaceports %}
+    try {
+        var lat = parseFloat("{{ spaceport.coordinates.0 }}");
+        var lng = parseFloat("{{ spaceport.coordinates.1 }}");
+        console.log('Debug - Processing coordinates:', lat, lng);
+        
+        if (!isNaN(lat) && !isNaN(lng)) {
+            var coordinates = [lat, lng];
+            allCoordinates.push(coordinates);
+            console.log('Debug - Added coordinates:', coordinates);
+            
+            var marker = L.marker(coordinates).addTo(map);
+            var popupContent = `
+                <strong>{{ spaceport.name }}</strong><br>
+                Match: {{ spaceport.probability }}%<br>
+                <em>Weather information coming soon...</em>
+            `;
+            marker.bindPopup(popupContent);
+        }
+    } catch (e) {
+        console.error('Error adding marker:', e);
+    }
+    {% endfor %}
+
+    // Fit bounds if we have valid coordinates
+    if (allCoordinates.length > 0) {
+        try {
+            console.log('Debug - All coordinates:', allCoordinates);
+            var bounds = L.latLngBounds(allCoordinates);
+            map.fitBounds(bounds, {
+                padding: [50, 50],
+                maxZoom: 12
+            });
+        } catch (e) {
+            console.error('Error fitting bounds:', e);
+            // Fallback to default view of continental US
+            map.setView([39.8283, -98.5795], 4);
+        }
+    }
+</script>
+{% endblock %} 
