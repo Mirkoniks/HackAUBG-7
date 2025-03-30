@@ -1,163 +1,116 @@
 {% extends 'rocket_port_predictor/base.html' %}
+{% load static %}
 
 {% block title %}Prediction Results{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 <style>
     #map {
-        height: 500px;
+        height: 400px;
         width: 100%;
         margin-bottom: 20px;
     }
-    .spaceport-card {
+    .location-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
         margin-bottom: 20px;
-        transition: transform 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .spaceport-card:hover {
-        transform: translateY(-5px);
+    .location-card h3 {
+        color: #2c3e50;
+        margin-bottom: 15px;
     }
-    .probability-badge {
+    .probability {
+        color: #3498db;
+        font-weight: bold;
         font-size: 1.2em;
-        padding: 5px 10px;
-        border-radius: 15px;
     }
     .weather-info {
-        color: #666;
-        font-style: italic;
-    }
-    .location-list {
-        margin-top: 20px;
-        padding: 20px;
-        background-color: #f8f9fa;
-        border-radius: 10px;
-    }
-    .debug-info {
+        margin-top: 10px;
         padding: 10px;
-        background-color: #f0f0f0;
-        border: 1px solid #ddd;
-        margin: 10px 0;
-        font-family: monospace;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+    }
+    .weather-info i {
+        margin-right: 8px;
+        color: #666;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <h2 class="text-center mb-4">Recommended Spaceport Locations</h2>
-        
-        <!-- Debug information -->
-        <div class="debug-info">
-            <p>Debug - Number of spaceports: {{ spaceports|length }}</p>
-            {% for spaceport in spaceports %}
-            <p>Debug - Spaceport: {{ spaceport }}</p>
-            {% endfor %}
-        </div>
-        
-        <!-- Text display of locations -->
-        {% if spaceports %}
-        <div class="location-list">
-            <h3 class="text-center mb-3">Top 3 Recommended Locations:</h3>
-            {% for spaceport in spaceports %}
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">{{ spaceport.name }}</h5>
-                    <p class="card-text">
-                        <strong>Match Probability:</strong> {{ spaceport.probability }}%<br>
-                        <strong>Coordinates:</strong> {{ spaceport.coordinates.0 }}, {{ spaceport.coordinates.1 }}
-                    </p>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="alert alert-warning">
-            No spaceport predictions available. Please try submitting the form again.
-        </div>
-        {% endif %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Recommended Spaceport Locations</h1>
 
-        <!-- Map display -->
-        <div id="map"></div>
-    </div>
-</div>
+    <!-- Map Container -->
+    <div id="map" class="mb-4"></div>
 
-<div class="row">
-    {% for spaceport in spaceports %}
-    <div class="col-md-4">
-        <div class="card spaceport-card">
-            <div class="card-body">
-                <h5 class="card-title">{{ spaceport.name }}</h5>
-                <div class="text-center mb-3">
-                    <span class="badge bg-primary probability-badge">
-                        {{ spaceport.probability }}% Match
-                    </span>
-                </div>
+    <!-- Location Cards -->
+    <div class="row">
+        {% for spaceport in spaceports %}
+        <div class="col-md-4 mb-4">
+            <div class="location-card">
+                <h3>{{ spaceport.name }}</h3>
+                <p class="probability">Probability: {{ spaceport.probability }}%</p>
                 <div class="weather-info">
-                    <p class="mb-0">Weather information coming soon...</p>
+                    <p><i class="fas fa-thermometer-half"></i> Temperature: {{ spaceport.weather.temperature }}°C</p>
+                    <p><i class="fas fa-wind"></i> Wind Speed: {{ spaceport.weather.wind_speed }} km/h</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Weather data from: {{ spaceport.weather.city }}</p>
                 </div>
             </div>
         </div>
-    </div>
-    {% endfor %}
-</div>
-
-<div class="row mt-4">
-    <div class="col-12 text-center">
-        <a href="{% url 'mission_form' %}" class="btn btn-primary">Start New Mission</a>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center">No spaceport predictions available.</p>
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script>
-    // Initialize the map centered on the US
-    var map = L.map('map').setView([39.8283, -98.5795], 4);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    // Store coordinates for bounds calculation
-    var allCoordinates = [];
-
-    // Add markers for each spaceport
-    {% for spaceport in spaceports %}
-    try {
-        var lat = parseFloat("{{ spaceport.coordinates.0 }}");
-        var lng = parseFloat("{{ spaceport.coordinates.1 }}");
-        console.log('Debug - Processing coordinates:', lat, lng);
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize the map
+        var map = L.map('map');
         
-        if (!isNaN(lat) && !isNaN(lng)) {
-            var coordinates = [lat, lng];
-            allCoordinates.push(coordinates);
-            console.log('Debug - Added coordinates:', coordinates);
-            
-            var marker = L.marker(coordinates).addTo(map);
-            var popupContent = `
-                <strong>{{ spaceport.name }}</strong><br>
-                Match: {{ spaceport.probability }}%<br>
-                <em>Weather information coming soon...</em>
-            `;
-            marker.bindPopup(popupContent);
-        }
-    } catch (e) {
-        console.error('Error adding marker:', e);
-    }
-    {% endfor %}
+        // Add the OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
 
-    // Fit bounds if we have valid coordinates
-    if (allCoordinates.length > 0) {
-        try {
-            console.log('Debug - All coordinates:', allCoordinates);
-            var bounds = L.latLngBounds(allCoordinates);
+        var markers = [];
+        var bounds = L.latLngBounds();
+        
+        // Add markers for each spaceport
+        {% for spaceport in spaceports %}
+            var lat = {{ spaceport.coordinates.0 }};
+            var lng = {{ spaceport.coordinates.1 }};
+            var marker = L.marker([lat, lng])
+                .bindPopup(
+                    "<b>{{ spaceport.name }}</b><br>" +
+                    "Probability: {{ spaceport.probability }}%<br>" +
+                    "Temperature: {{ spaceport.weather.temperature }}°C<br>" +
+                    "Wind Speed: {{ spaceport.weather.wind_speed }} km/h"
+                )
+                .addTo(map);
+            markers.push(marker);
+            bounds.extend([lat, lng]);
+        {% endfor %}
+        
+        // If we have markers, fit the map to show all of them
+        if (markers.length > 0) {
             map.fitBounds(bounds, {
-                padding: [50, 50],
-                maxZoom: 12
+                padding: [50, 50]
             });
-        } catch (e) {
-            console.error('Error fitting bounds:', e);
-            // Fallback to default view of continental US
-            map.setView([39.8283, -98.5795], 4);
+        } else {
+            // Default view if no markers
+            map.setView([0, 0], 2);
         }
-    }
+    });
 </script>
 {% endblock %} 

@@ -42,6 +42,60 @@ class MissionPredictionView(LoginRequiredMixin, FormView):
     form_class = MissionForm
     success_url = reverse_lazy('prediction_results')
 
+    def get_seasonal_weather(self, city, month):
+        # Define seasonal weather patterns for different regions
+        weather_patterns = {
+            'Cayenne': {  # Tropical climate
+                'temp': {'winter': 26, 'spring': 27, 'summer': 28, 'fall': 27},
+                'wind': {'winter': 15, 'spring': 12, 'summer': 10, 'fall': 12}
+            },
+            'Moscow': {  # Continental climate
+                'temp': {'winter': -8, 'spring': 10, 'summer': 23, 'fall': 5},
+                'wind': {'winter': 15, 'spring': 12, 'summer': 10, 'fall': 13}
+            },
+            'Orlando': {  # Subtropical climate
+                'temp': {'winter': 15, 'spring': 23, 'summer': 28, 'fall': 20},
+                'wind': {'winter': 12, 'spring': 15, 'summer': 10, 'fall': 12}
+            },
+            'Los Angeles': {  # Mediterranean climate
+                'temp': {'winter': 18, 'spring': 20, 'summer': 24, 'fall': 22},
+                'wind': {'winter': 10, 'spring': 12, 'summer': 8, 'fall': 10}
+            },
+            'Washington': {  # Humid subtropical climate
+                'temp': {'winter': 3, 'spring': 15, 'summer': 26, 'fall': 14},
+                'wind': {'winter': 15, 'spring': 14, 'summer': 10, 'fall': 12}
+            },
+            'Anchorage': {  # Subarctic climate
+                'temp': {'winter': -5, 'spring': 5, 'summer': 18, 'fall': 5},
+                'wind': {'winter': 20, 'spring': 15, 'summer': 12, 'fall': 18}
+            },
+            'Phoenix': {  # Desert climate
+                'temp': {'winter': 15, 'spring': 25, 'summer': 35, 'fall': 25},
+                'wind': {'winter': 8, 'spring': 12, 'summer': 10, 'fall': 8}
+            },
+            'London': {  # Maritime climate
+                'temp': {'winter': 5, 'spring': 12, 'summer': 18, 'fall': 10},
+                'wind': {'winter': 18, 'spring': 15, 'summer': 12, 'fall': 16}
+            },
+            'Stockholm': {  # Cold maritime climate
+                'temp': {'winter': -3, 'spring': 8, 'summer': 20, 'fall': 7},
+                'wind': {'winter': 20, 'spring': 15, 'summer': 12, 'fall': 18}
+            }
+        }
+        
+        # Get season based on month
+        if month in [12, 1, 2]:
+            season = 'winter'
+        elif month in [3, 4, 5]:
+            season = 'spring'
+        elif month in [6, 7, 8]:
+            season = 'summer'
+        else:  # 9, 10, 11
+            season = 'fall'
+            
+        city_weather = weather_patterns.get(city, weather_patterns['Orlando'])  # Default to Orlando if city not found
+        return city_weather['temp'][season], city_weather['wind'][season]
+
     def form_valid(self, form):
         try:
             # Save the mission data with the current user
@@ -62,6 +116,7 @@ class MissionPredictionView(LoginRequiredMixin, FormView):
             
             # Format the launch date as YYYY-MM-DD
             formatted_date = mission.launch_date.strftime("%Y-%m-%d")
+            launch_month = mission.launch_date.month
             
             # Create input data matching the notebook format
             input_data = {
@@ -138,38 +193,77 @@ class MissionPredictionView(LoginRequiredMixin, FormView):
             
             spaceports = []
             
-            # Define spaceport names and their coordinates
+            # Define spaceport names and their coordinates and nearest weather city
             spaceport_info = {
-                'ELV-1 (SLV), Guiana Space Centre, French Guiana, France': {'coordinates': [5.2367, -52.7697]},
-                'Site 370/13, Yasny Cosmodrome, Russia': {'coordinates': [51.2083, 59.8500]},
-                'Site 43/3, Plesetsk Cosmodrome, Russia': {'coordinates': [62.9271, 40.5777]},
-                'LC-39A, Kennedy Space Center, Florida, USA': {'coordinates': [28.5729, -80.6490]},
-                'SLC-40, Cape Canaveral Space Force Station, Florida, USA': {'coordinates': [28.4866, -80.5446]},
-                'SLC-4E, Vandenberg Space Force Base, California, USA': {'coordinates': [34.7420, -120.5724]},
-                'LP-0A, Wallops Flight Facility, Virginia, USA': {'coordinates': [37.9402, -75.4664]},
-                'LP-3B, Pacific Spaceport Complex, Alaska, USA': {'coordinates': [57.4333, -152.3417]},
-                'Launch Site One, Spaceport America, New Mexico, USA': {'coordinates': [32.9904, -106.9749]},
-                'Launch Complex, Mojave Air and Space Port, California, USA': {'coordinates': [35.0594, -118.1517]},
-                'Launch Complex, Spaceport Cornwall, Newquay, UK': {'coordinates': [50.4404, -5.0007]},
-                'Launch Complex, Esrange Space Center, Sweden': {'coordinates': [67.8856, 21.0800]}
+                'ELV-1 (SLV), Guiana Space Centre, French Guiana, France': {
+                    'coordinates': [5.2367, -52.7697],
+                    'weather_city': 'Cayenne'  # Nearest city in French Guiana
+                },
+                'Site 370/13, Yasny Cosmodrome, Russia': {
+                    'coordinates': [51.2083, 59.8500],
+                    'weather_city': 'Moscow'  # Major Russian city
+                },
+                'Site 43/3, Plesetsk Cosmodrome, Russia': {
+                    'coordinates': [62.9271, 40.5777],
+                    'weather_city': 'Moscow'  # Major Russian city
+                },
+                'LC-39A, Kennedy Space Center, Florida, USA': {
+                    'coordinates': [28.5729, -80.6490],
+                    'weather_city': 'Orlando'  # Nearest major city
+                },
+                'SLC-40, Cape Canaveral Space Force Station, Florida, USA': {
+                    'coordinates': [28.4866, -80.5446],
+                    'weather_city': 'Orlando'  # Nearest major city
+                },
+                'SLC-4E, Vandenberg Space Force Base, California, USA': {
+                    'coordinates': [34.7420, -120.5724],
+                    'weather_city': 'Los Angeles'  # Nearest major city
+                },
+                'LP-0A, Wallops Flight Facility, Virginia, USA': {
+                    'coordinates': [37.9402, -75.4664],
+                    'weather_city': 'Washington'  # Nearest major city
+                },
+                'LP-3B, Pacific Spaceport Complex, Alaska, USA': {
+                    'coordinates': [57.4333, -152.3417],
+                    'weather_city': 'Anchorage'  # Nearest major city
+                },
+                'Launch Site One, Spaceport America, New Mexico, USA': {
+                    'coordinates': [32.9904, -106.9749],
+                    'weather_city': 'Phoenix'  # Nearest major city
+                },
+                'Launch Complex, Mojave Air and Space Port, California, USA': {
+                    'coordinates': [35.0594, -118.1517],
+                    'weather_city': 'Los Angeles'  # Nearest major city
+                },
+                'Launch Complex, Spaceport Cornwall, Newquay, UK': {
+                    'coordinates': [50.4404, -5.0007],
+                    'weather_city': 'London'  # Major UK city
+                },
+                'Launch Complex, Esrange Space Center, Sweden': {
+                    'coordinates': [67.8856, 21.0800],
+                    'weather_city': 'Stockholm'  # Major Swedish city
+                }
             }
             
-            # Get top 3 spaceports with their probabilities
+            # Get top 3 spaceports with their probabilities and weather predictions
             for idx, location_name in zip(top_3_indices, location_names):
                 location_name = str(location_name)  # Convert numpy string to Python string
                 if location_name in spaceport_info:
                     spaceport = spaceport_info[location_name]
                     probability = float(predictions[idx]) * 100  # Convert to percentage
                     
+                    # Get weather prediction based on seasonal patterns
+                    weather_city = spaceport['weather_city']
+                    temp, wind = self.get_seasonal_weather(weather_city, launch_month)
+                    
                     spaceports.append({
                         'name': location_name,
                         'coordinates': spaceport['coordinates'],
                         'probability': round(probability, 2),
                         'weather': {
-                            'temperature': 20.0,
-                            'wind_speed': 10.0,
-                            'humidity': 60.0,
-                            'cloud_coverage': 30.0
+                            'temperature': temp,
+                            'wind_speed': wind,
+                            'city': weather_city
                         }
                     })
                 else:
