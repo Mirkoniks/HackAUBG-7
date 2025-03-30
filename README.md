@@ -1,4 +1,4 @@
-# Space Mission Planner
+# OptiLaunch
 
 An intelligent Django web app that simulates and predicts optimal space launch sites and weather conditions using Machine Learning.
 
