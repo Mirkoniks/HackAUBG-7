@@ -1,0 +1,222 @@
+{% extends 'rocket_port_predictor/base.html' %}
+{% load static %}
+
+{% block title %}Form{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: var(--color-background);
+        min-height: 100vh;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding: 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stars {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .star {
+        position: absolute;
+        background: var(--color-primary);
+        border-radius: 50%;
+        animation: twinkle var(--duration) ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+        0% { opacity: 0; }
+        50% { opacity: 1; }
+        100% { opacity: 0; }
+    }
+
+    .form-container {
+        width: 90%;
+        max-width: 420px;
+        position: relative;
+        z-index: 2;
+        display: flex;
+        justify-content: center;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-card {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid var(--color-border);
+        border-radius: 24px;
+        padding: 3rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(4px);
+    }
+
+    .form-title {
+        font-family: var(--font-heading);
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--color-primary);
+        text-align: center;
+        margin-bottom: 3rem;
+        letter-spacing: 0.05em;
+        position: relative;
+        padding-bottom: 1rem;
+    }
+
+    .form-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 2px;
+        background: var(--color-primary);
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+        width: 100%;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+        color: var(--color-primary);
+        font-family: var(--font-heading);
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+
+    .form-label i {
+        font-size: 1.25rem;
+        width: 24px;
+        text-align: center;
+    }
+
+    .form-control {
+        width: 100%;
+        box-sizing: border-box;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid var(--color-border);
+        border-radius: 16px;
+        padding: 1.25rem;
+        color: var(--color-primary);
+        font-family: var(--font-body);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control::placeholder {
+        color: var(--color-text-muted);
+    }
+
+    .form-control:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .form-control:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+    }
+
+    .submit-button {
+        width: 100%;
+        background: var(--color-primary);
+        border: none;
+        border-radius: 16px;
+        padding: 1.25rem;
+        color: var(--color-background);
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 1.1rem;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        margin-top: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-button:hover {
+        background: var(--color-text-muted);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+    }
+
+    .alert-danger {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--color-primary);
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        font-family: var(--font-body);
+        text-align: center;
+    }
+
+    @media (max-width: 480px) {
+        .form-card {
+            padding: 2rem;
+        }
+
+        .form-title {
+            font-size: 1.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="stars"></div>
+<div class="form-container">
+    <div class="form-card">
+        <h2 class="form-title">Your Form Title</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <div class="form-label">
+                    <i class="fas fa-user"></i>
+                    Field Label
+                </div>
+                <input type="text" name="field_name" class="form-control" placeholder="Enter your value" required>
+            </div>
+            <!-- Add more form groups as needed -->
+            <button type="submit" class="submit-button">Submit</button>
+        </form>
+    </div>
+</div>
+{% endblock %} 
